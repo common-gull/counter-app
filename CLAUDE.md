@@ -31,9 +31,14 @@ Use **Bun**, not npm or pnpm.
 
 - **No `svelte.config.js`.** Compiler options and the adapter are inline in
   `vite.config.ts`, in the `sveltekit({ ... })` call.
-- **Static SPA**: `adapter-static` with `fallback: 'index.html'`, `ssr = false` in
-  `src/routes/+layout.ts`. Nothing may assume a server at runtime — no
-  `+page.server.ts`, no form actions.
+- **Static SPA on GitHub Pages**: `adapter-static` with `fallback: 'index.html'` and
+  `router.type: 'hash'`. Nothing may assume a server at runtime — no `+page.server.ts`,
+  no form actions, and no `ssr`/`prerender` page options (hash routing already implies
+  both, and SvelteKit errors if you set them).
+- **Build internal links with `resolve()`** from `$app/paths`, never a bare `href="/…"`.
+  It prefixes both the base path and the `#`; a hardcoded path silently breaks on Pages.
+- **`BASE_PATH`** sets `paths.base` at build time (CI passes `/<repo>`); unset locally so
+  dev stays at `/`. `static/.nojekyll` is required, or Pages' Jekyll drops `_app/`.
 - **Runes forced on** outside `node_modules`. Use `$state`/`$derived`/`$props`, never
   `export let` or `$:`.
 

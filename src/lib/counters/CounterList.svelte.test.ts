@@ -73,7 +73,8 @@ describe('CounterList', () => {
 		const component = mount(CounterList, { target: document.body, props: { now: NOW } });
 		await waitForText('Cat treats');
 
-		expect(document.body.querySelector('a')?.getAttribute('href')).toBe(`/counter/${id}`);
+		// Hash routing: resolve() prefixes the base and the '#'.
+		expect(document.body.querySelector('a')?.getAttribute('href')).toBe(`#/counter/${id}`);
 		unmount(component);
 	});
 

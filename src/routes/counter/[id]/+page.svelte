@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { liveQuery } from 'dexie';
 	import CounterHeader from '$lib/counters/CounterHeader.svelte';
@@ -28,10 +29,10 @@
 	<div class="card p-8 text-center">
 		<h1 class="section-title">Counter not found</h1>
 		<p class="muted mt-1">It may have been deleted.</p>
-		<a href="/" class="btn btn-secondary mt-4">Back to all counters</a>
+		<a href={resolve('/')} class="btn btn-secondary mt-4">Back to all counters</a>
 	</div>
 {:else}
-	<CounterHeader {counter} ondeleted={() => goto('/')} />
+	<CounterHeader {counter} ondeleted={() => goto(resolve('/'))} />
 
 	<div class="mb-4">
 		<LogForm counterId={counter.id} unit={counter.unit} />

@@ -3,6 +3,12 @@ import { defineConfig } from 'vitest/config';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 
+// GitHub Pages serves a project site from /<repo>, so CI builds with BASE_PATH set.
+// Empty locally, which keeps `bun run dev` at /. Anything not starting with a slash is
+// ignored rather than silently producing broken asset URLs.
+const fromEnv = process.env.BASE_PATH ?? '';
+const base: '' | `/${string}` = fromEnv.startsWith('/') ? (fromEnv as `/${string}`) : '';
+
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
@@ -13,7 +19,12 @@ export default defineConfig({
 			},
 			// SPA mode: /counter/[id] ids only exist at runtime, and IndexedDB is
 			// browser-only, so serve a single shell and route on the client.
-			adapter: adapter({ fallback: 'index.html' })
+			adapter: adapter({ fallback: 'index.html' }),
+			paths: { base },
+			// Routes live in the hash, so GitHub Pages never sees them and deep links
+			// need no 404.html trick. Build links with `resolve()` from $app/paths,
+			// which prefixes the base and the '#' for you.
+			router: { type: 'hash' }
 		})
 	],
 	test: {
