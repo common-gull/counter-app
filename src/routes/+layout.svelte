@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { hashHref } from '$lib/nav';
 	import { page } from '$app/state';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
@@ -20,11 +20,11 @@
 <div class="min-h-screen">
 	<header class="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
 		<nav class="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3">
-			<a href={resolve('/')} class="text-base font-semibold tracking-tight hover:opacity-70">
+			<a href={hashHref('/')} class="text-base font-semibold tracking-tight hover:opacity-70">
 				Counter
 			</a>
 			<a
-				href={resolve('/settings')}
+				href={hashHref('/settings')}
 				aria-current={onSettings ? 'page' : undefined}
 				class="rounded-lg px-2.5 py-1.5 text-sm transition
 					{onSettings ? 'bg-surface-muted font-medium text-ink' : 'text-ink-muted hover:bg-surface-muted'}"

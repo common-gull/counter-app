@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { hashHref } from '../nav';
 	import { liveQuery } from 'dexie';
 	import { totalBetween } from '../entries/queries';
 	import { formatCount } from '../format';
@@ -14,7 +14,7 @@
 </script>
 
 <a
-	href={resolve('/counter/[id]', { id: String(counter.id) })}
+	href={hashHref('/counter/[id]', { id: String(counter.id) })}
 	class="card flex items-center justify-between gap-4 px-4 py-3.5 transition
 		hover:border-line-strong hover:shadow
 		focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"

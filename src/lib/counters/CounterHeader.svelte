@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { hashHref } from '../nav';
 	import { liveQuery } from 'dexie';
 	import { countEntries } from '../entries/queries';
 	import { deleteCounter, updateCounter } from './queries';
@@ -52,7 +52,7 @@
 </script>
 
 <div class="mb-6">
-	<a href={resolve('/')} class="muted hover:text-ink">&larr; All counters</a>
+	<a href={hashHref('/')} class="muted hover:text-ink">&larr; All counters</a>
 
 	{#if mode === 'editing'}
 		<form onsubmit={save} class="mt-2 flex flex-col gap-2">
