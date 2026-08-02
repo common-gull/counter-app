@@ -14,6 +14,19 @@ Use **Bun**, not npm or pnpm.
 | `bun run check` | svelte-check |
 | `bun run build` | static build into `build/` |
 
+## Commits
+
+[Conventional Commits](https://www.conventionalcommits.org): `type(scope): summary`.
+
+- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `build`.
+- Scope is the domain (`counters`, `entries`, `backup`) or a cross-cutting area
+  (`ui`, `build`, `deps`). Omit it if the change is genuinely global.
+- Summary is imperative, lower case, no trailing full stop.
+- `style:` means formatting only (whitespace, semicolons). A visual redesign is
+  `feat(ui)`, not `style`.
+- Keep commits atomic and ordered: a shared-class change and the feature that uses it
+  are two commits, the shared change first.
+
 ## Config
 
 - **No `svelte.config.js`.** Compiler options and the adapter are inline in
