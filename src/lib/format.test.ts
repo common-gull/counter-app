@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayHeading, formatTimeOfDay } from './format';
+import {
+	formatDayHeading,
+	formatTimeOfDay,
+	fromDateTimeLocal,
+	toDateTimeLocal
+} from './format';
 
 const EDT = '-04:00';
 const EST = '-05:00';
@@ -14,6 +19,54 @@ describe('formatTimeOfDay', () => {
 	it('uses the local day, not UTC', () => {
 		// 01:30Z is 21:30 the previous evening in New York.
 		expect(formatTimeOfDay(ts('2025-06-19T01:30:00Z'), 'en-US')).toBe('9:30 PM');
+	});
+});
+
+describe('toDateTimeLocal', () => {
+	it('formats in local time, zero-padded', () => {
+		expect(toDateTimeLocal(ts(`2025-06-05T09:07:00${EDT}`))).toBe('2025-06-05T09:07');
+	});
+
+	it('uses the local day, not UTC', () => {
+		// 01:30Z is 21:30 the previous evening in New York.
+		expect(toDateTimeLocal(ts('2025-06-19T01:30:00Z'))).toBe('2025-06-18T21:30');
+	});
+});
+
+describe('fromDateTimeLocal', () => {
+	it('parses as local time, not UTC', () => {
+		expect(fromDateTimeLocal('2025-06-18T14:30')).toBe(ts(`2025-06-18T14:30:00${EDT}`));
+	});
+
+	it('accepts a seconds component', () => {
+		expect(fromDateTimeLocal('2025-06-18T14:30:00')).toBe(ts(`2025-06-18T14:30:00${EDT}`));
+	});
+
+	it('rejects an empty string', () => {
+		expect(fromDateTimeLocal('')).toBeNull();
+	});
+
+	it('rejects a malformed value', () => {
+		expect(fromDateTimeLocal('18/06/2025 2:30pm')).toBeNull();
+	});
+
+	it('rejects an impossible date', () => {
+		expect(fromDateTimeLocal('2025-02-30T14:30')).toBeNull();
+	});
+
+	it('round-trips to the minute', () => {
+		const original = ts(`2025-06-18T14:30:00${EDT}`);
+		expect(fromDateTimeLocal(toDateTimeLocal(original))).toBe(original);
+	});
+
+	it('rejects a local time that DST skipped', () => {
+		// Clocks jump 02:00 -> 03:00 on 2025-03-09, so 02:30 never happens.
+		expect(fromDateTimeLocal('2025-03-09T02:30')).toBeNull();
+	});
+
+	it('resolves an ambiguous fall-back time to the earlier instant', () => {
+		// 01:30 happens twice on 2025-11-02; the input cannot distinguish them.
+		expect(fromDateTimeLocal('2025-11-02T01:30')).toBe(ts(`2025-11-02T01:30:00${EDT}`));
 	});
 });
 

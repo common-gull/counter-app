@@ -1,4 +1,4 @@
-import { mount, unmount } from 'svelte';
+import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -34,6 +34,14 @@ async function waitForText(text: string, timeoutMs = 2000) {
 }
 
 const headings = () => [...document.body.querySelectorAll('h3')].map((h) => h.textContent!.trim());
+
+async function waitForRows(count: number, timeoutMs = 2000) {
+	const deadline = Date.now() + timeoutMs;
+	while (document.body.querySelectorAll('li').length !== count) {
+		if (Date.now() > deadline) throw new Error(`timed out waiting for ${count} rows`);
+		await new Promise((resolve) => setTimeout(resolve, 5));
+	}
+}
 
 describe('EntryList', () => {
 	it('shows an empty state when nothing is logged', async () => {
@@ -89,6 +97,38 @@ describe('EntryList', () => {
 		const component = render();
 		await waitForText('Today');
 		expect(document.body.textContent).not.toContain('99');
+		unmount(component);
+	});
+
+	it('drops a row when its entry is deleted through the list', async () => {
+		await logEntry(counterId, 1, T0);
+		await logEntry(counterId, 2, T0 - 60 * 60_000);
+		const component = render();
+		await waitForText('Today');
+		expect(document.body.querySelectorAll('li')).toHaveLength(2);
+
+		const row = document.body.querySelector('li')!;
+		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+		flushSync();
+		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+
+		await waitForRows(1);
+		expect(document.body.querySelectorAll('li')).toHaveLength(1);
+		unmount(component);
+	});
+
+	it('removes the day heading once its last entry goes', async () => {
+		await logEntry(counterId, 1, T0);
+		const component = render();
+		await waitForText('Today');
+
+		const row = document.body.querySelector('li')!;
+		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+		flushSync();
+		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+
+		await waitForText('Nothing logged yet');
+		expect(headings()).toEqual([]);
 		unmount(component);
 	});
 
