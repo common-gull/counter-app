@@ -22,8 +22,8 @@ export default defineConfig({
 			adapter: adapter({ fallback: 'index.html' }),
 			paths: { base },
 			// Routes live in the hash, so GitHub Pages never sees them and deep links
-			// need no 404.html trick. Build links with `hashHref()` from $lib/nav, not
-			// `resolve()` — see the note there.
+			// need no 404.html trick. Internal links must be written as plain "#/..."
+			// so they stay same-document; see CLAUDE.md.
 			router: { type: 'hash' }
 		})
 	],

@@ -35,11 +35,12 @@ Use **Bun**, not npm or pnpm.
   `router.type: 'hash'`. Nothing may assume a server at runtime — no `+page.server.ts`,
   no form actions, and no `ssr`/`prerender` page options (hash routing already implies
   both, and SvelteKit errors if you set them).
-- **Build internal links with `hashHref()`** from `$lib/nav`, never `resolve()` and
-  never a bare `href="/…"`. `resolve()` keeps the base, giving a pathname without the
-  trailing slash Pages serves; in hash mode SvelteKit then treats the link as external
-  and the browser does a full page load. `hashHref` strips the base, leaving a
-  same-document `#/…` link. Applies to `goto` too.
+- **Write internal links as plain `#/…`** — `href="#/settings"`, `goto('#/')`. Not
+  `href="/settings"`, and not `resolve('/settings')`: `resolve` prepends the base, and
+  in hash mode SvelteKit treats a link whose pathname differs from the current one as
+  external, so the browser does a full page load. Pages serves the app at `/<repo>/`
+  while `resolve` yields `/<repo>`, so they always differ. A bare `#/…` resolves
+  against the current pathname and is correct whatever the base is.
 - **`BASE_PATH`** sets `paths.base` at build time (CI passes `/<repo>`); unset locally so
   dev stays at `/`. `static/.nojekyll` is required, or Pages' Jekyll drops `_app/`.
 - **Runes forced on** outside `node_modules`. Use `$state`/`$derived`/`$props`, never

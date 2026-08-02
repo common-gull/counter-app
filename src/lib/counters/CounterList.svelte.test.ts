@@ -73,7 +73,8 @@ describe('CounterList', () => {
 		const component = mount(CounterList, { target: document.body, props: { now: NOW } });
 		await waitForText('Cat treats');
 
-		// Hash routing: resolve() prefixes the base and the '#'.
+		// Hash-only, so it stays same-document whatever base the site is served from.
+		// A link carrying the base has a different pathname and reloads the page.
 		expect(document.body.querySelector('a')?.getAttribute('href')).toBe(`#/counter/${id}`);
 		unmount(component);
 	});
