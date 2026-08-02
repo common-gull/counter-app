@@ -67,6 +67,19 @@ src/lib/
 - **Keep logic out of components** — validation and formatting go in plain modules so
   they're node-testable.
 
+## Runes
+
+Following the [Svelte best practices](https://svelte.dev/docs/svelte/best-practices):
+
+- `$state` only for values read reactively. A `bind:this` ref used only inside event
+  handlers is a plain `let`.
+- `$state.raw` for objects replaced rather than mutated. For anything handed to
+  IndexedDB this is required, not merely faster: a deep `$state` proxy cannot be
+  structured-cloned, and the write fails at runtime.
+- Compute with `$derived`, never `$effect`. There are currently zero effects in this
+  codebase; adding one needs a reason.
+- Key every `{#each}` by a stable id, never the array index.
+
 ## Testing
 
 Filename suffix picks the environment:

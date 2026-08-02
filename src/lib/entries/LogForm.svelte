@@ -6,7 +6,9 @@
 
 	let amount = $state('');
 	let error = $state('');
-	let input = $state<HTMLInputElement>();
+	// Plain let, not $state: only ever read imperatively in the submit handler, so
+	// making it reactive would buy nothing.
+	let input: HTMLInputElement | undefined;
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();

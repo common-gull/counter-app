@@ -3,7 +3,8 @@
 	import type { Backup } from './types';
 	import { parseBackup } from './validate';
 
-	let input = $state<HTMLInputElement>();
+	// Plain let, not $state: only ever read imperatively in the handlers below.
+	let input: HTMLInputElement | undefined;
 	// raw, not deep-proxied: IndexedDB cannot structured-clone a Proxy, so handing a
 	// plain `$state` object to importAll fails at write time.
 	let pending = $state.raw<Backup | undefined>(undefined);
