@@ -58,6 +58,19 @@
 	--accent-ink: #18181b;
 }
 
+@layer base {
+	/*
+	 * The page background belongs to the document, not to a component. This app does
+	 * not server-render, so the body is empty until the bundle mounts; if only the
+	 * layout <div> carried the background, the browser would paint its default white
+	 * canvas first and flash on every load and reload.
+	 */
+	html {
+		background-color: var(--canvas);
+		color: var(--ink);
+	}
+}
+
 /*
  * A handful of shared classes so buttons, cards and inputs stay consistent across
  * components instead of each one re-inventing its own spacing and colours.

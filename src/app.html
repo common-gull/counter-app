@@ -4,6 +4,21 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
+		<style>
+			/*
+			 * Canvas colour before the stylesheet has parsed, so an unload or a slow
+			 * network cannot show a white frame. Values mirror --canvas in layout.css;
+			 * the stylesheet overrides this the moment it lands.
+			 */
+			:root {
+				color-scheme: light;
+				background-color: #f9fafb;
+			}
+			:root.dark {
+				color-scheme: dark;
+				background-color: #09090b;
+			}
+		</style>
 		<script>
 			// Runs before first paint so the page never flashes the wrong theme. It
 			// duplicates a little of src/lib/theme/theme.ts on purpose: nothing from the

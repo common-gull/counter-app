@@ -14,7 +14,8 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<div class="min-h-screen bg-canvas text-ink">
+<!-- Background and text colour come from <html>; see layout.css. -->
+<div class="min-h-screen">
 	<header class="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
 		<nav class="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3">
 			<a href="/" class="text-base font-semibold tracking-tight hover:opacity-70">Counter</a>

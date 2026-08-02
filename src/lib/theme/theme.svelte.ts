@@ -28,9 +28,27 @@ export const theme = {
 	}
 };
 
+/**
+ * Keeps the mobile browser chrome in step with the page. Reads the resolved value of
+ * `--canvas` rather than repeating the palette, so it cannot drift from layout.css.
+ */
+function syncThemeColor(): void {
+	const canvas = getComputedStyle(document.documentElement).getPropertyValue('--canvas').trim();
+	if (canvas === '') return;
+
+	let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+	if (!meta) {
+		meta = document.createElement('meta');
+		meta.name = 'theme-color';
+		document.head.append(meta);
+	}
+	meta.content = canvas;
+}
+
 function apply(): void {
 	const dark = resolveTheme(preference, prefersDark) === 'dark';
 	document.documentElement.classList.toggle('dark', dark);
+	syncThemeColor();
 }
 
 /**

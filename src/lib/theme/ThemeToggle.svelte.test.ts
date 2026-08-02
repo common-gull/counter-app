@@ -113,3 +113,29 @@ describe('ThemeToggle', () => {
 		unmount(component);
 	});
 });
+
+describe('mobile browser chrome', () => {
+	const themeColor = () =>
+		document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.content;
+
+	afterEach(() => {
+		document.querySelector('meta[name="theme-color"]')?.remove();
+		document.documentElement.style.removeProperty('--canvas');
+	});
+
+	it('matches the page canvas', () => {
+		// jsdom loads no stylesheet, so stand the token up inline.
+		document.documentElement.style.setProperty('--canvas', '#09090b');
+		const component = render();
+		click('Dark');
+		expect(themeColor()).toBe('#09090b');
+		unmount(component);
+	});
+
+	it('is left alone when the canvas colour cannot be resolved', () => {
+		const component = render();
+		click('Dark');
+		expect(themeColor()).toBeUndefined();
+		unmount(component);
+	});
+});
