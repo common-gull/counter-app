@@ -28,13 +28,20 @@
 <dl class="grid grid-cols-3 gap-2">
 	{#each windows as window (window.key)}
 		<div class="card px-2 py-3 text-center sm:px-3">
-			<dt class="text-[11px] font-medium text-gray-500 uppercase sm:text-xs sm:tracking-wide">
+			<dt
+				class="truncate text-[10px] font-medium tracking-wide text-gray-500 uppercase sm:text-xs"
+			>
 				{window.label}
 			</dt>
-			<dd class="mt-1 truncate text-xl font-semibold tabular-nums sm:text-2xl">
-				{$totals?.[window.key] ?? '…'}{#if unit}<span
-						class="ml-1 text-xs font-normal text-gray-500">{unit}</span
-					>{/if}
+			<!-- Number and unit stack: on one baseline the unit crowds the figure, and
+				 the three tiles stop lining up once the figures differ in width. -->
+			<dd class="mt-2">
+				<span class="block text-2xl leading-none font-semibold tabular-nums">
+					{$totals?.[window.key] ?? '…'}
+				</span>
+				{#if unit}
+					<span class="mt-1.5 block truncate text-[11px] text-gray-500">{unit}</span>
+				{/if}
 			</dd>
 		</div>
 	{/each}

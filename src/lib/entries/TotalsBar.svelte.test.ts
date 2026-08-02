@@ -80,6 +80,28 @@ describe('TotalsBar', () => {
 		unmount(component);
 	});
 
+	it('keeps the figure and unit in separate elements', async () => {
+		await logEntry(counterId, 5, T0);
+		const component = mount(TotalsBar, {
+			target: document.body,
+			props: { counterId, unit: 'treats', now: NOW }
+		});
+
+		const deadline = Date.now() + 2000;
+		while (!document.body.textContent?.includes('5')) {
+			if (Date.now() > deadline) throw new Error('timed out waiting for the figure');
+			await new Promise((resolve) => setTimeout(resolve, 5));
+		}
+
+		// Sharing a baseline made "13 treats" read as one blob and knocked the three
+		// tiles out of alignment once the figures differed in width.
+		const parts = [...document.body.querySelector('dd')!.querySelectorAll('span')].map((s) =>
+			s.textContent!.trim()
+		);
+		expect(parts).toEqual(['5', 'treats']);
+		unmount(component);
+	});
+
 	it('updates when an entry is logged after mount', async () => {
 		const component = render();
 		await waitForFigures(['0', '0', '0']);
