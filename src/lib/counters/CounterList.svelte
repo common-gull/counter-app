@@ -9,9 +9,12 @@
 </script>
 
 {#if $counters === undefined}
-	<p class="text-gray-500">Loading…</p>
+	<p class="muted">Loading…</p>
 {:else if $counters.length === 0}
-	<p class="text-gray-500">No counters yet. Add one above to start tracking.</p>
+	<div class="card p-8 text-center">
+		<p class="font-medium text-gray-900">No counters yet</p>
+		<p class="muted mt-1">Add one above to start tracking.</p>
+	</div>
 {:else}
 	<ul class="flex flex-col gap-2">
 		{#each $counters as counter (counter.id)}

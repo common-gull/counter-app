@@ -16,16 +16,19 @@
 </script>
 
 {#if groups === undefined}
-	<p class="text-gray-500">Loading…</p>
+	<p class="muted">Loading…</p>
 {:else if groups.length === 0}
-	<p class="text-gray-500">Nothing logged yet.</p>
+	<div class="card p-8 text-center">
+		<p class="font-medium text-gray-900">Nothing logged yet</p>
+		<p class="muted mt-1">Use the box above to log your first amount.</p>
+	</div>
 {:else}
 	{#each groups as group (group.key)}
-		<section class="mb-4">
-			<h3 class="mb-1 text-sm font-medium text-gray-500">
+		<section class="mb-5">
+			<h3 class="mb-1.5 text-xs font-semibold tracking-wide text-gray-500 uppercase">
 				{formatDayHeading(group.timestamp, now)}
 			</h3>
-			<ul class="divide-y divide-gray-100 overflow-hidden rounded-lg border border-gray-200 bg-white">
+			<ul class="card divide-y divide-gray-100 overflow-hidden">
 				{#each group.entries as entry (entry.id)}
 					<EntryRow {entry} {unit} />
 				{/each}
@@ -34,6 +37,6 @@
 	{/each}
 
 	{#if $entries !== undefined && $entries.length === HISTORY_LIMIT}
-		<p class="text-sm text-gray-500">Showing the {HISTORY_LIMIT} most recent entries.</p>
+		<p class="muted">Showing the {HISTORY_LIMIT} most recent entries.</p>
 	{/if}
 {/if}

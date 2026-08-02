@@ -13,12 +13,15 @@
 
 <a
 	href="/counter/{counter.id}"
-	class="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3 transition hover:border-gray-300 hover:bg-gray-50"
+	class="card flex items-center justify-between gap-4 px-4 py-3.5 transition
+		hover:border-gray-300 hover:shadow
+		focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
 >
-	<span class="font-medium text-gray-900">{counter.name}</span>
-	<span class="text-right text-sm text-gray-500">
-		<span class="text-lg font-semibold tabular-nums text-gray-900">{$total ?? '—'}</span>
-		{#if counter.unit}<span class="ml-1">{counter.unit}</span>{/if}
-		<span class="ml-1">today</span>
+	<span class="min-w-0 truncate font-medium">{counter.name}</span>
+
+	<span class="flex shrink-0 items-baseline gap-1.5">
+		<span class="text-xl font-semibold tabular-nums">{$total ?? '…'}</span>
+		{#if counter.unit}<span class="text-sm text-gray-500">{counter.unit}</span>{/if}
+		<span class="text-sm text-gray-400">today</span>
 	</span>
 </a>

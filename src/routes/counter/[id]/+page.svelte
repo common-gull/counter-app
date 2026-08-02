@@ -21,26 +21,27 @@
 <svelte:head><title>{counter?.name ?? 'Counter'}</title></svelte:head>
 
 {#if $found === undefined}
-	<p class="text-gray-500">Loading…</p>
+	<p class="muted">Loading…</p>
 {:else if counter === undefined}
-	<h1 class="mb-2 text-2xl font-semibold text-gray-900">Counter not found</h1>
-	<p class="text-gray-500">
-		It may have been deleted. <a href="/" class="underline">Back to all counters</a>.
-	</p>
+	<div class="card p-8 text-center">
+		<h1 class="section-title">Counter not found</h1>
+		<p class="muted mt-1">It may have been deleted.</p>
+		<a href="/" class="btn btn-secondary mt-4">Back to all counters</a>
+	</div>
 {:else}
-	<div class="mb-4 flex items-baseline justify-between gap-4">
-		<h1 class="text-2xl font-semibold text-gray-900">{counter.name}</h1>
-		<a href="/" class="text-sm text-gray-600 hover:text-gray-900">All counters</a>
+	<div class="mb-6">
+		<a href="/" class="muted hover:text-gray-900">&larr; All counters</a>
+		<h1 class="page-title mt-1 break-words">{counter.name}</h1>
 	</div>
 
 	<div class="mb-4">
 		<LogForm counterId={counter.id} unit={counter.unit} />
 	</div>
 
-	<div class="mb-6">
+	<div class="mb-8">
 		<TotalsBar counterId={counter.id} unit={counter.unit} />
 	</div>
 
-	<h2 class="mb-2 text-lg font-medium text-gray-900">History</h2>
+	<h2 class="section-title mb-3">History</h2>
 	<EntryList counterId={counter.id} unit={counter.unit} />
 {/if}

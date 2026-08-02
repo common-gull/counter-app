@@ -48,59 +48,51 @@
 	}
 </script>
 
-<li class="px-4 py-2">
+<li class="group px-4 py-2.5">
 	{#if mode === 'edit'}
 		<form onsubmit={save} class="flex flex-wrap items-center gap-2">
 			<input
 				bind:value={amount}
 				aria-label="Amount"
 				inputmode="decimal"
-				class="w-24 rounded-md border border-gray-300 px-2 py-1 focus:border-gray-500 focus:outline-none"
+				class="field {error !== '' ? 'field-invalid' : ''} w-24 py-1"
 			/>
 			<input
 				bind:value={when}
 				type="datetime-local"
 				aria-label="Date and time"
-				class="rounded-md border border-gray-300 px-2 py-1 focus:border-gray-500 focus:outline-none"
+				class="field w-auto flex-1 py-1"
 			/>
-			<button type="submit" class="rounded-md bg-gray-900 px-3 py-1 text-sm text-white">
-				Save
-			</button>
-			<button type="button" onclick={cancel} class="px-2 py-1 text-sm text-gray-600">
-				Cancel
-			</button>
+			<button type="submit" class="btn btn-primary btn-sm">Save</button>
+			<button type="button" onclick={cancel} class="btn btn-ghost btn-sm">Cancel</button>
 			{#if error}<p role="alert" class="w-full text-sm text-red-600">{error}</p>{/if}
 		</form>
 	{:else if mode === 'confirming-delete'}
 		<div class="flex flex-wrap items-center justify-between gap-2">
-			<span class="text-sm text-gray-700">Delete this entry?</span>
+			<span class="text-sm font-medium text-gray-900">Delete this entry?</span>
 			<span class="flex gap-2">
-				<button
-					type="button"
-					onclick={confirmDelete}
-					class="rounded-md bg-red-600 px-3 py-1 text-sm text-white">Delete</button
-				>
-				<button type="button" onclick={cancel} class="px-2 py-1 text-sm text-gray-600">
-					Keep
-				</button>
+				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm">Delete</button>
+				<button type="button" onclick={cancel} class="btn btn-ghost btn-sm">Keep</button>
 			</span>
 		</div>
 	{:else}
-		<div class="flex items-center justify-between gap-2">
-			<span class="text-sm text-gray-500">{formatTimeOfDay(entry.timestamp)}</span>
+		<div class="flex items-center justify-between gap-3">
+			<span class="text-sm tabular-nums text-gray-500">{formatTimeOfDay(entry.timestamp)}</span>
+
 			<span class="flex items-center gap-3">
-				<span class="font-medium tabular-nums text-gray-900">
+				<span class="font-medium tabular-nums">
 					{entry.amount}{#if unit}<span class="ml-1 text-sm font-normal text-gray-500">{unit}</span
 						>{/if}
 				</span>
-				<button type="button" onclick={startEditing} class="text-sm text-gray-600 hover:underline">
-					Edit
-				</button>
-				<button
-					type="button"
-					onclick={() => (mode = 'confirming-delete')}
-					class="text-sm text-gray-600 hover:underline">Delete</button
-				>
+				<!-- Kept discoverable on touch, where hover never happens. -->
+				<span class="flex gap-1 opacity-60 transition group-hover:opacity-100">
+					<button type="button" onclick={startEditing} class="btn btn-ghost btn-sm">Edit</button>
+					<button
+						type="button"
+						onclick={() => (mode = 'confirming-delete')}
+						class="btn btn-ghost btn-sm">Delete</button
+					>
+				</span>
 			</span>
 		</div>
 	{/if}

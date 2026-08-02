@@ -23,25 +23,18 @@
 	}
 </script>
 
-<form onsubmit={submit}>
+<form onsubmit={submit} class="card p-4">
 	<div class="flex items-start gap-2">
-		<div class="flex-1">
-			<input
-				bind:this={input}
-				bind:value={amount}
-				aria-label="Amount"
-				inputmode="decimal"
-				placeholder={unit ? `How many ${unit}?` : 'How many?'}
-				aria-invalid={error !== ''}
-				class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-gray-500 focus:outline-none"
-			/>
-		</div>
-		<button
-			type="submit"
-			class="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
-		>
-			Log
-		</button>
+		<input
+			bind:this={input}
+			bind:value={amount}
+			aria-label="Amount"
+			inputmode="decimal"
+			placeholder={unit ? `How many ${unit}?` : 'How many?'}
+			aria-invalid={error !== ''}
+			class="field {error !== '' ? 'field-invalid' : ''} flex-1"
+		/>
+		<button type="submit" class="btn btn-primary shrink-0">Log</button>
 	</div>
-	{#if error}<p role="alert" class="mt-1 text-sm text-red-600">{error}</p>{/if}
+	{#if error}<p role="alert" class="mt-2 text-sm text-red-600">{error}</p>{/if}
 </form>

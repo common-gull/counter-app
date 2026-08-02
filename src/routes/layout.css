@@ -1,2 +1,60 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+/*
+ * A handful of shared classes so buttons, cards and inputs stay consistent across
+ * components instead of each one re-inventing its own spacing and colours.
+ */
+@layer components {
+	.card {
+		@apply rounded-xl border border-gray-200 bg-white shadow-sm;
+	}
+
+	.btn {
+		@apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2
+			text-sm font-medium transition
+			focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900;
+	}
+
+	.btn-primary {
+		@apply bg-gray-900 text-white hover:bg-gray-700;
+	}
+
+	.btn-secondary {
+		@apply border border-gray-300 bg-white text-gray-900 hover:bg-gray-50;
+	}
+
+	.btn-danger {
+		@apply bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600;
+	}
+
+	.btn-ghost {
+		@apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+	}
+
+	.btn-sm {
+		@apply px-3 py-1 text-sm;
+	}
+
+	.field {
+		@apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900
+			transition placeholder:text-gray-400
+			focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 focus:outline-none;
+	}
+
+	.field-invalid {
+		@apply border-red-400 focus:border-red-500 focus:ring-red-500/10;
+	}
+
+	.page-title {
+		@apply text-2xl font-semibold tracking-tight text-gray-900;
+	}
+
+	.section-title {
+		@apply text-base font-semibold text-gray-900;
+	}
+
+	.muted {
+		@apply text-sm text-gray-600;
+	}
+}
