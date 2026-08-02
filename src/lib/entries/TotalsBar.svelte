@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
+	import { formatCount } from '../format';
 	import { rangeFor } from '../time';
 	import { totalBetween } from './queries';
 
@@ -25,23 +26,20 @@
 	] as const;
 </script>
 
-<dl class="grid grid-cols-3 gap-2">
+<!--
+	Stacked rows rather than three columns. Side by side, a large total has nowhere to
+	go: it widens its column, breaks the grid and drags the page past the viewport.
+	As rows, the label holds its width and the figure truncates within what is left.
+-->
+<dl class="card divide-y divide-gray-100">
 	{#each windows as window (window.key)}
-		<div class="card px-2 py-3 text-center sm:px-3">
-			<dt
-				class="truncate text-[10px] font-medium tracking-wide text-gray-500 uppercase sm:text-xs"
-			>
-				{window.label}
-			</dt>
-			<!-- Number and unit stack: on one baseline the unit crowds the figure, and
-				 the three tiles stop lining up once the figures differ in width. -->
-			<dd class="mt-2">
-				<span class="block text-2xl leading-none font-semibold tabular-nums">
-					{$totals?.[window.key] ?? '…'}
+		<div class="flex items-baseline justify-between gap-4 px-4 py-3">
+			<dt class="shrink-0 text-sm text-gray-600">{window.label}</dt>
+			<dd class="flex min-w-0 items-baseline gap-1.5">
+				<span class="truncate text-xl font-semibold tabular-nums">
+					{$totals ? formatCount($totals[window.key]) : '…'}
 				</span>
-				{#if unit}
-					<span class="mt-1.5 block truncate text-[11px] text-gray-500">{unit}</span>
-				{/if}
+				{#if unit}<span class="shrink-0 text-sm text-gray-500">{unit}</span>{/if}
 			</dd>
 		</div>
 	{/each}

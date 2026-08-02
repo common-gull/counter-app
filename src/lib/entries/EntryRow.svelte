@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTimeOfDay, fromDateTimeLocal, toDateTimeLocal } from '../format';
+	import { formatCount, formatTimeOfDay, fromDateTimeLocal, toDateTimeLocal } from '../format';
 	import { deleteEntry, updateEntry } from './queries';
 	import type { Entry } from './types';
 	import { validateAmount } from './validate';
@@ -96,7 +96,8 @@
 					{formatTimeOfDay(entry.timestamp)}
 				</span>
 				<span class="min-w-0 truncate font-medium tabular-nums">
-					{entry.amount}{#if unit}<span class="ml-1 text-sm font-normal text-gray-500">{unit}</span
+					{formatCount(entry.amount)}{#if unit}<span
+							class="ml-1 text-sm font-normal text-gray-500">{unit}</span
 						>{/if}
 				</span>
 			</span>

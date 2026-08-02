@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	formatCount,
 	formatDayHeading,
 	formatTimeOfDay,
 	fromDateTimeLocal,
@@ -10,6 +11,28 @@ const EDT = '-04:00';
 const EST = '-05:00';
 const NOW = new Date(`2025-06-18T12:00:00${EDT}`);
 const ts = (iso: string) => new Date(iso).getTime();
+
+describe('formatCount', () => {
+	it('leaves a small number alone', () => {
+		expect(formatCount(5, 'en-US')).toBe('5');
+	});
+
+	it('groups thousands', () => {
+		expect(formatCount(1234, 'en-US')).toBe('1,234');
+	});
+
+	it('groups a very large number', () => {
+		expect(formatCount(1234123412470, 'en-US')).toBe('1,234,123,412,470');
+	});
+
+	it('keeps a fractional amount', () => {
+		expect(formatCount(1.5, 'en-US')).toBe('1.5');
+	});
+
+	it('formats zero', () => {
+		expect(formatCount(0, 'en-US')).toBe('0');
+	});
+});
 
 describe('formatTimeOfDay', () => {
 	it('formats in local time', () => {

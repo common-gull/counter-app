@@ -5,6 +5,11 @@ import { dayKey, startOfLocalDay } from './time';
  * assertions don't depend on the machine's locale.
  */
 
+/** Thousands separators, so a large total stays readable. */
+export function formatCount(value: number, locale?: string): string {
+	return new Intl.NumberFormat(locale).format(value);
+}
+
 export function formatTimeOfDay(ts: number, locale?: string): string {
 	return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(ts);
 }

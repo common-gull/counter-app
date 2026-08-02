@@ -80,6 +80,18 @@ describe('TotalsBar', () => {
 		unmount(component);
 	});
 
+	it('groups a large total and leaves it able to truncate', async () => {
+		// This figure widened its grid column and dragged the page past the viewport.
+		await logEntry(counterId, 1234123412470, T0);
+		const component = render();
+		const grouped = '1,234,123,412,470';
+		await waitForFigures([grouped, grouped, grouped]);
+
+		// Without `truncate` the figure has nothing stopping it overflowing again.
+		expect(document.body.querySelector('dd span')?.className).toContain('truncate');
+		unmount(component);
+	});
+
 	it('keeps the figure and unit in separate elements', async () => {
 		await logEntry(counterId, 5, T0);
 		const component = mount(TotalsBar, {
