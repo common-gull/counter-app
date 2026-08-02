@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { addCounter } from './queries';
-	import { validateCounterName } from './validate';
+	import { validateCounterName, validateUnit } from './validate';
 
 	let name = $state('');
 	let unit = $state('');
@@ -8,13 +8,20 @@
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
-		const checked = validateCounterName(name);
-		if (!checked.ok) {
-			error = checked.error;
+		const checkedName = validateCounterName(name);
+		if (!checkedName.ok) {
+			error = checkedName.error;
 			return;
 		}
-		const trimmedUnit = unit.trim();
-		await addCounter({ name: checked.value, ...(trimmedUnit === '' ? {} : { unit: trimmedUnit }) });
+		const checkedUnit = validateUnit(unit);
+		if (!checkedUnit.ok) {
+			error = checkedUnit.error;
+			return;
+		}
+		await addCounter({
+			name: checkedName.value,
+			...(checkedUnit.value === '' ? {} : { unit: checkedUnit.value })
+		});
 		name = '';
 		unit = '';
 		error = '';

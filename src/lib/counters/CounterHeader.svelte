@@ -1,25 +1,27 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { countEntries } from '../entries/queries';
-	import { deleteCounter, renameCounter } from './queries';
+	import { deleteCounter, updateCounter } from './queries';
 	import type { Counter } from './types';
-	import { validateCounterName } from './validate';
+	import { validateCounterName, validateUnit } from './validate';
 
 	// `ondeleted` rather than navigating here, so the component stays testable
 	// without a router.
 	let { counter, ondeleted }: { counter: Counter; ondeleted?: () => void } = $props();
 
-	type Mode = 'view' | 'renaming' | 'confirming-delete';
+	type Mode = 'view' | 'editing' | 'confirming-delete';
 	let mode = $state<Mode>('view');
 	let name = $state('');
+	let unit = $state('');
 	let error = $state('');
 
 	const entryCount = $derived(liveQuery(() => countEntries(counter.id)));
 
-	function startRenaming() {
+	function startEditing() {
 		name = counter.name;
+		unit = counter.unit ?? '';
 		error = '';
-		mode = 'renaming';
+		mode = 'editing';
 	}
 
 	function cancel() {
@@ -27,14 +29,22 @@
 		mode = 'view';
 	}
 
-	async function saveName(event: SubmitEvent) {
+	async function save(event: SubmitEvent) {
 		event.preventDefault();
-		const checked = validateCounterName(name);
-		if (!checked.ok) {
-			error = checked.error;
+
+		const checkedName = validateCounterName(name);
+		if (!checkedName.ok) {
+			error = checkedName.error;
 			return;
 		}
-		await renameCounter(counter.id, checked.value);
+		const checkedUnit = validateUnit(unit);
+		if (!checkedUnit.ok) {
+			error = checkedUnit.error;
+			return;
+		}
+
+		// An empty unit is meaningful here: it clears one that was set before.
+		await updateCounter(counter.id, { name: checkedName.value, unit: checkedUnit.value });
 		mode = 'view';
 		error = '';
 	}
@@ -48,13 +58,19 @@
 <div class="mb-6">
 	<a href="/" class="muted hover:text-gray-900">&larr; All counters</a>
 
-	{#if mode === 'renaming'}
-		<form onsubmit={saveName} class="mt-2 flex flex-wrap items-start gap-2">
+	{#if mode === 'editing'}
+		<form onsubmit={save} class="mt-2 flex flex-wrap items-start gap-2">
 			<input
 				bind:value={name}
 				aria-label="Counter name"
 				aria-invalid={error !== ''}
 				class="field {error !== '' ? 'field-invalid' : ''} min-w-48 flex-1"
+			/>
+			<input
+				bind:value={unit}
+				aria-label="Unit (optional)"
+				placeholder="treats"
+				class="field w-28 shrink-0"
 			/>
 			<button type="submit" class="btn btn-primary">Save</button>
 			<button type="button" onclick={cancel} class="btn btn-ghost">Cancel</button>
@@ -64,7 +80,7 @@
 		<div class="mt-1 flex flex-wrap items-center justify-between gap-3">
 			<h1 class="page-title break-words">{counter.name}</h1>
 			<span class="flex shrink-0 gap-1">
-				<button type="button" onclick={startRenaming} class="btn btn-ghost btn-sm">Rename</button>
+				<button type="button" onclick={startEditing} class="btn btn-ghost btn-sm">Edit</button>
 				<button
 					type="button"
 					onclick={() => (mode = 'confirming-delete')}

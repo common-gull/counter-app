@@ -41,12 +41,14 @@ function click(label: string) {
 	flushSync();
 }
 
-function nameField(): HTMLInputElement {
-	return document.body.querySelector<HTMLInputElement>('input[aria-label="Counter name"]')!;
+function field(label: string): HTMLInputElement {
+	return document.body.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)!;
 }
 
-function type(value: string) {
-	const input = nameField();
+const nameField = () => field('Counter name');
+
+function type(value: string, label = 'Counter name') {
+	const input = field(label);
 	input.value = value;
 	input.dispatchEvent(new Event('input', { bubbles: true }));
 	flushSync();
@@ -86,17 +88,17 @@ describe('CounterHeader', () => {
 	});
 });
 
-describe('CounterHeader renaming', () => {
+describe('CounterHeader editing', () => {
 	it('pre-fills the current name', () => {
 		const component = render();
-		click('Rename');
+		click('Edit');
 		expect(nameField().value).toBe('Cat treats');
 		unmount(component);
 	});
 
 	it('saves a new name', async () => {
 		const component = render();
-		click('Rename');
+		click('Edit');
 		type('Dog treats');
 		submitForm();
 
@@ -107,7 +109,7 @@ describe('CounterHeader renaming', () => {
 
 	it('trims the new name', async () => {
 		const component = render();
-		click('Rename');
+		click('Edit');
 		type('   Dog treats   ');
 		submitForm();
 
@@ -118,7 +120,7 @@ describe('CounterHeader renaming', () => {
 
 	it('rejects an empty name and saves nothing', async () => {
 		const component = render();
-		click('Rename');
+		click('Edit');
 		type('   ');
 		submitForm();
 		flushSync();
@@ -130,12 +132,82 @@ describe('CounterHeader renaming', () => {
 
 	it('discards changes on cancel', async () => {
 		const component = render();
-		click('Rename');
+		click('Edit');
 		type('Something else');
 		click('Cancel');
 
 		expect(document.body.querySelector('form')).toBeNull();
 		expect((await getCounter(counter.id))?.name).toBe('Cat treats');
+		unmount(component);
+	});
+
+	it('pre-fills the current unit', async () => {
+		const id = await addCounter({ name: 'Water', unit: 'cups' }, T0);
+		counter = (await getCounter(id))!;
+		const component = render();
+
+		click('Edit');
+
+		expect(field('Unit (optional)').value).toBe('cups');
+		unmount(component);
+	});
+
+	it('leaves the unit field empty when the counter has none', () => {
+		const component = render();
+		click('Edit');
+		expect(field('Unit (optional)').value).toBe('');
+		unmount(component);
+	});
+
+	it('changes the unit', async () => {
+		const component = render();
+		click('Edit');
+		type('treats', 'Unit (optional)');
+		submitForm();
+
+		await waitUntil(async () => (await getCounter(counter.id))?.unit === 'treats', 'the new unit');
+		expect((await getCounter(counter.id))?.unit).toBe('treats');
+		unmount(component);
+	});
+
+	it('clears the unit when the field is emptied', async () => {
+		const id = await addCounter({ name: 'Water', unit: 'cups' }, T0);
+		counter = (await getCounter(id))!;
+		const component = render();
+
+		click('Edit');
+		type('', 'Unit (optional)');
+		submitForm();
+
+		await waitUntil(async () => (await getCounter(id))?.unit === undefined, 'the unit to clear');
+		expect(await getCounter(id)).not.toHaveProperty('unit');
+		unmount(component);
+	});
+
+	it('changes name and unit together', async () => {
+		const component = render();
+		click('Edit');
+		type('Dog treats');
+		type('biscuits', 'Unit (optional)');
+		submitForm();
+
+		await waitUntil(async () => (await getCounter(counter.id))?.unit === 'biscuits', 'the update');
+		expect(await getCounter(counter.id)).toMatchObject({
+			name: 'Dog treats',
+			unit: 'biscuits'
+		});
+		unmount(component);
+	});
+
+	it('rejects an overlong unit and saves nothing', async () => {
+		const component = render();
+		click('Edit');
+		type('x'.repeat(50), 'Unit (optional)');
+		submitForm();
+		flushSync();
+
+		expect(document.body.querySelector('[role="alert"]')?.textContent).toMatch(/unit/i);
+		expect(await getCounter(counter.id)).not.toHaveProperty('unit');
 		unmount(component);
 	});
 });

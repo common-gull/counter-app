@@ -72,6 +72,19 @@ describe('NewCounterForm', () => {
 		unmount(component);
 	});
 
+	it('rejects an overlong unit and saves nothing', async () => {
+		const component = mount(NewCounterForm, { target: document.body });
+
+		type(field('Counter name'), 'Water');
+		type(field('Unit (optional)'), 'x'.repeat(50));
+		submitForm();
+		flushSync();
+
+		expect(document.body.querySelector('[role="alert"]')?.textContent).toMatch(/unit/i);
+		expect(await listCounters()).toEqual([]);
+		unmount(component);
+	});
+
 	it('rejects an empty name and saves nothing', async () => {
 		const component = mount(NewCounterForm, { target: document.body });
 
