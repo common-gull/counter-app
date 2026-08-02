@@ -22,7 +22,10 @@ function render() {
 	return mount(EntryList, { target: document.body, props: { counterId, now: NOW } });
 }
 
-const headings = () => [...document.body.querySelectorAll('h3')].map((h) => h.textContent!.trim());
+const headings = () =>
+	[...document.body.querySelectorAll('h3')].map((h) =>
+		h.querySelector('span')!.textContent!.trim()
+	);
 
 describe('EntryList', () => {
 	it('shows an empty state when nothing is logged', async () => {
@@ -57,6 +60,58 @@ describe('EntryList', () => {
 		const component = render();
 		await waitForText('Yesterday');
 		expect(headings()).toEqual(['Today', 'Yesterday', 'Sun, Jun 15']);
+		unmount(component);
+	});
+
+	it("shows the day's total beside the heading", async () => {
+		await logEntry(counterId, 2, T0);
+		await logEntry(counterId, 3, T0 - 60 * 60_000);
+		const component = render();
+		await waitForText('Today');
+
+		expect(document.body.querySelector('h3')?.textContent).toContain('5');
+		unmount(component);
+	});
+
+	it('totals each day separately', async () => {
+		await logEntry(counterId, 2, T0);
+		await logEntry(counterId, 7, T0 - DAY);
+		const component = render();
+		await waitForText('Yesterday');
+
+		const totals = [...document.body.querySelectorAll('h3')].map((h) =>
+			h.querySelectorAll('span')[1]?.textContent?.trim()
+		);
+		expect(totals).toEqual(['2', '7']);
+		unmount(component);
+	});
+
+	it("names the unit in the day's total", async () => {
+		await logEntry(counterId, 2, T0);
+		const component = mount(EntryList, {
+			target: document.body,
+			props: { counterId, unit: 'treats', now: NOW }
+		});
+		await waitForText('Today');
+
+		expect(document.body.querySelector('h3')?.textContent?.replace(/\s+/g, ' ')).toContain(
+			'2 treats'
+		);
+		unmount(component);
+	});
+
+	it("updates the day's total when an entry is logged", async () => {
+		await logEntry(counterId, 2, T0);
+		const component = render();
+		await waitForText('Today');
+
+		await logEntry(counterId, 3, T0);
+
+		await waitUntil(
+			() => document.body.querySelector('h3')?.textContent?.includes('5') ?? false,
+			'the updated total'
+		);
+		expect(document.body.querySelector('h3')?.textContent).toContain('5');
 		unmount(component);
 	});
 

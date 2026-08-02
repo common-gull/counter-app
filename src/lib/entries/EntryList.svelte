@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
-	import { formatDayHeading } from '../format';
+	import { formatCount, formatDayHeading } from '../format';
 	import EntryRow from './EntryRow.svelte';
 	import { groupByDay } from './group';
 	import { HISTORY_LIMIT, listEntries } from './queries';
@@ -25,8 +25,14 @@
 {:else}
 	{#each groups as group (group.key)}
 		<section class="mb-5">
-			<h3 class="mb-1.5 text-xs font-semibold tracking-wide text-ink-subtle uppercase">
-				{formatDayHeading(group.timestamp, now)}
+			<h3
+				class="mb-1.5 flex items-baseline justify-between gap-2 text-xs font-semibold
+					tracking-wide text-ink-subtle uppercase"
+			>
+				<span>{formatDayHeading(group.timestamp, now)}</span>
+				<span class="text-ink-muted normal-case tabular-nums">
+					{formatCount(group.total)}{#if unit}&nbsp;{unit}{/if}
+				</span>
 			</h3>
 			<ul class="card divide-y divide-line overflow-hidden">
 				{#each group.entries as entry (entry.id)}

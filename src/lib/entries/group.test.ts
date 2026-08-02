@@ -57,6 +57,30 @@ describe('groupByDay', () => {
 		expect(groups.map((g) => g.key)).toEqual(['2025-06-18', '2025-06-17', '2025-06-18']);
 	});
 
+	it('totals the amounts in a group', () => {
+		const groups = groupByDay([
+			at(`2025-06-18T20:00:00${EDT}`, 1, 2),
+			at(`2025-06-18T09:00:00${EDT}`, 2, 3)
+		]);
+		expect(groups[0]!.total).toBe(5);
+	});
+
+	it('totals each day separately', () => {
+		const groups = groupByDay([
+			at(`2025-06-18T09:00:00${EDT}`, 1, 2),
+			at(`2025-06-17T09:00:00${EDT}`, 2, 7)
+		]);
+		expect(groups.map((g) => g.total)).toEqual([2, 7]);
+	});
+
+	it('totals a fractional amount', () => {
+		const groups = groupByDay([
+			at(`2025-06-18T09:00:00${EDT}`, 1, 1.5),
+			at(`2025-06-18T10:00:00${EDT}`, 2, 2)
+		]);
+		expect(groups[0]!.total).toBe(3.5);
+	});
+
 	it('takes the heading timestamp from the first entry of the group', () => {
 		const first = at(`2025-06-18T20:00:00${EDT}`, 1);
 		const groups = groupByDay([first, at(`2025-06-18T09:00:00${EDT}`, 2)]);
