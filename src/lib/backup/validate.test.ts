@@ -94,6 +94,68 @@ describe('parseBackup', () => {
 		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
 	});
 
+	// Import is the second write path into these tables. Everything the forms refuse
+	// has to be refused here too, or a hand-edited file walks straight past it.
+	it('rejects a counter with an empty name', () => {
+		const broken = { ...valid, counters: [{ ...valid.counters[0]!, name: '' }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('rejects a counter whose name is only whitespace', () => {
+		const broken = { ...valid, counters: [{ ...valid.counters[0]!, name: '   ' }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('rejects a counter name past the length limit', () => {
+		const broken = { ...valid, counters: [{ ...valid.counters[0]!, name: 'a'.repeat(61) }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('trims a counter name rather than storing it padded', () => {
+		const padded = { ...valid, counters: [{ ...valid.counters[0]!, name: '  Cat treats  ' }] };
+		const result = parseBackup(serialise(padded));
+		expect(result.ok && result.value.counters[0]!.name).toBe('Cat treats');
+	});
+
+	it('rejects a unit that is not a string', () => {
+		const broken = { ...valid, counters: [{ ...valid.counters[0]!, unit: {} }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('rejects a unit past the length limit', () => {
+		const broken = { ...valid, counters: [{ ...valid.counters[0]!, unit: 'x'.repeat(17) }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('drops an empty unit rather than storing one', () => {
+		const blank = { ...valid, counters: [{ ...valid.counters[0]!, unit: '   ' }] };
+		const result = parseBackup(serialise(blank));
+		expect(result.ok && result.value.counters[0]).not.toHaveProperty('unit');
+	});
+
+	it('rejects a zero amount', () => {
+		const broken = { ...valid, entries: [{ ...valid.entries[0]!, amount: 0 }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('rejects a negative amount', () => {
+		const broken = { ...valid, entries: [{ ...valid.entries[0]!, amount: -5 }] };
+		expect(parseBackup(serialise(broken))).toMatchObject({ ok: false });
+	});
+
+	it('accepts a fractional amount', () => {
+		const fractional = { ...valid, entries: [{ ...valid.entries[0]!, amount: 1.5 }] };
+		expect(parseBackup(serialise(fractional))).toMatchObject({ ok: true });
+	});
+
+	it('rejects an entry whose counter is missing', () => {
+		// Deleting a counter cascades, so the app never holds an orphaned entry.
+		const orphaned = { ...valid, entries: [{ ...valid.entries[0]!, counterId: 999 }] };
+		const result = parseBackup(serialise(orphaned));
+		expect(result).toMatchObject({ ok: false });
+		expect(result.ok === false && result.error).toMatch(/missing counter/i);
+	});
+
 	it('defaults a missing exportedAt rather than failing', () => {
 		const { exportedAt: _dropped, ...rest } = valid;
 		const result = parseBackup(serialise(rest));
