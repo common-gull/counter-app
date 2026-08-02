@@ -1,0 +1,82 @@
+# counter-app
+
+Local-first count tracker. Add a section ("Cat treats"), log amounts, see day/week/month
+totals. Data lives in the browser via IndexedDB. 
+
+## Commands
+
+Use **Bun**, not npm or pnpm.
+
+| | |
+|---|---|
+| `bun run dev` | dev server |
+| `bun run test` | both vitest projects |
+| `bun run check` | svelte-check |
+| `bun run build` | static build into `build/` |
+
+## Config
+
+- **No `svelte.config.js`.** Compiler options and the adapter are inline in
+  `vite.config.ts`, in the `sveltekit({ ... })` call.
+- **Static SPA**: `adapter-static` with `fallback: 'index.html'`, `ssr = false` in
+  `src/routes/+layout.ts`. Nothing may assume a server at runtime — no
+  `+page.server.ts`, no form actions.
+- **Runes forced on** outside `node_modules`. Use `$state`/`$derived`/`$props`, never
+  `export let` or `$:`.
+
+## Architecture
+
+**Organised by domain, not by layer.** A domain owns its types, queries, tests and
+components.
+
+```
+src/lib/
+  db.ts                shared: Dexie instance + schema for all tables
+  time.ts              shared: local-time bucketing
+  counters/            types.ts, queries.ts, components
+  entries/             types.ts, queries.ts, components   (includes totals)
+  backup/              types.ts, backup.ts                (export/import)
+  testing/             test-only helpers
+```
+
+- **Only `db.ts` constructs Dexie.** Domain code imports `db`; components import that
+  domain's `queries.ts`, never `db` directly.
+- **Reactivity is `liveQuery`, no wrapper.** It already satisfies the Svelte store
+  contract, so use `$derived(liveQuery(() => someQuery()))` and read it with `$`. There
+  is no custom rune bridge — don't reintroduce one; `fromStore` covers the rest.
+- **Timestamps are UTC epoch ms.** Local day/week/month bucketing happens at display
+  time in `src/lib/time.ts`. Never persist a local date string.
+- **Build date boundaries on `Date` component setters** (`setHours(0,0,0,0)`), never on
+  epoch arithmetic — a local day is 23 or 25 hours across DST.
+- **Ranges are half-open**: `from` inclusive, `to` exclusive.
+- **Pass time in, don't mock the clock.** Time functions take a `Date`; writes that
+  record a moment take an optional `at`.
+- **Keep logic out of components** — validation and formatting go in plain modules so
+  they're node-testable.
+
+## Testing
+
+Filename suffix picks the environment:
+
+| pattern | environment | for |
+|---|---|---|
+| `*.test.ts` | node, no DOM | logic, time, queries |
+| `*.svelte.test.ts` | jsdom | components, anything using runes |
+
+- **Component tests use jsdom, not a browser engine.** Don't reinstall Playwright or
+  `vitest-browser-svelte`. Mount with `mount`/`unmount` from `svelte`, `flushSync()`
+  after interactions, `$effect.root` for effects outside a component.
+  `resolve.conditions: ['browser']` on the client project is required — without it
+  Svelte resolves to its server build. https://svelte.dev/docs/svelte/testing
+- **`TZ` is pinned to `America/New_York`** on the server project. Don't remove it; a
+  guard test in `time.test.ts` fails first if it goes.
+- **`expect: { requireAssertions: true }`** — a test with no assertion fails.
+- **`fake-indexeddb/auto` is in `setupFiles` for both projects**, so tests hit a real
+  Dexie against an in-memory IndexedDB — compound-index queries included. There are no
+  mocks of the data layer; `beforeEach(resetDatabase)` from `$lib/testing/reset-db`
+  gives isolation.
+- **Query tests `await` directly.** Test `queries.ts` functions, not `liveQuery`
+  observables — that keeps tests free of emission polling.
+
+When adding a test for behaviour that matters, break the implementation once and
+confirm that test — and only that test — fails.

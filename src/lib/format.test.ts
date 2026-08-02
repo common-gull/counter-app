@@ -1,0 +1,51 @@
+import { describe, expect, it } from 'vitest';
+import { formatDayHeading, formatTimeOfDay } from './format';
+
+const EDT = '-04:00';
+const EST = '-05:00';
+const NOW = new Date(`2025-06-18T12:00:00${EDT}`);
+const ts = (iso: string) => new Date(iso).getTime();
+
+describe('formatTimeOfDay', () => {
+	it('formats in local time', () => {
+		expect(formatTimeOfDay(ts(`2025-06-18T14:30:00${EDT}`), 'en-US')).toBe('2:30 PM');
+	});
+
+	it('uses the local day, not UTC', () => {
+		// 01:30Z is 21:30 the previous evening in New York.
+		expect(formatTimeOfDay(ts('2025-06-19T01:30:00Z'), 'en-US')).toBe('9:30 PM');
+	});
+});
+
+describe('formatDayHeading', () => {
+	it('calls the current day Today', () => {
+		expect(formatDayHeading(ts(`2025-06-18T08:00:00${EDT}`), NOW, 'en-US')).toBe('Today');
+	});
+
+	it('calls the previous day Yesterday', () => {
+		expect(formatDayHeading(ts(`2025-06-17T23:00:00${EDT}`), NOW, 'en-US')).toBe('Yesterday');
+	});
+
+	it('formats older days as a short date', () => {
+		expect(formatDayHeading(ts(`2025-06-15T08:00:00${EDT}`), NOW, 'en-US')).toBe('Sun, Jun 15');
+	});
+
+	it('does not call a future day Yesterday', () => {
+		expect(formatDayHeading(ts(`2025-06-19T08:00:00${EDT}`), NOW, 'en-US')).not.toBe('Yesterday');
+	});
+
+	it('handles Yesterday across the fall-back DST boundary', () => {
+		// 2025-11-02 is 25 hours long; "yesterday" must still be the 1st.
+		const nowAfterChange = new Date(`2025-11-03T10:00:00${EST}`);
+		expect(formatDayHeading(ts(`2025-11-02T23:00:00${EST}`), nowAfterChange, 'en-US')).toBe(
+			'Yesterday'
+		);
+	});
+
+	it('handles Yesterday across a month boundary', () => {
+		const firstOfMonth = new Date(`2025-07-01T10:00:00${EDT}`);
+		expect(formatDayHeading(ts(`2025-06-30T22:00:00${EDT}`), firstOfMonth, 'en-US')).toBe(
+			'Yesterday'
+		);
+	});
+});
