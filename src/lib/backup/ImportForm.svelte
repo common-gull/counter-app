@@ -66,7 +66,7 @@
 		visually hidden input a visible focus ring.
 	-->
 	<label
-		class="btn btn-secondary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
+		class="btn btn-secondary btn-block focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
 	>
 		<input
 			bind:this={input}
@@ -96,11 +96,13 @@
 		<p class="mt-1 text-sm text-amber-800">
 			Restore {pending.counters.length} counters and {pending.entries.length} entries?
 		</p>
-		<div class="mt-3 flex flex-wrap gap-2">
-			<button type="button" onclick={confirmImport} class="btn btn-danger btn-sm">
+		<div class="mt-3 flex gap-2">
+			<button type="button" onclick={confirmImport} class="btn btn-danger btn-sm flex-1 sm:flex-none">
 				Replace my data
 			</button>
-			<button type="button" onclick={reset} class="btn btn-ghost btn-sm">Cancel</button>
+			<button type="button" onclick={reset} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+				Cancel
+			</button>
 		</div>
 	</div>
 {/if}

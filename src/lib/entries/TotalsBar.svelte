@@ -27,9 +27,11 @@
 
 <dl class="grid grid-cols-3 gap-2">
 	{#each windows as window (window.key)}
-		<div class="card px-3 py-3 text-center">
-			<dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{window.label}</dt>
-			<dd class="mt-1 text-2xl font-semibold tabular-nums">
+		<div class="card px-2 py-3 text-center sm:px-3">
+			<dt class="text-[11px] font-medium text-gray-500 uppercase sm:text-xs sm:tracking-wide">
+				{window.label}
+			</dt>
+			<dd class="mt-1 truncate text-xl font-semibold tabular-nums sm:text-2xl">
 				{$totals?.[window.key] ?? '…'}{#if unit}<span
 						class="ml-1 text-xs font-normal text-gray-500">{unit}</span
 					>{/if}

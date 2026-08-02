@@ -59,22 +59,28 @@
 	<a href="/" class="muted hover:text-gray-900">&larr; All counters</a>
 
 	{#if mode === 'editing'}
-		<form onsubmit={save} class="mt-2 flex flex-wrap items-start gap-2">
-			<input
-				bind:value={name}
-				aria-label="Counter name"
-				aria-invalid={error !== ''}
-				class="field {error !== '' ? 'field-invalid' : ''} min-w-48 flex-1"
-			/>
-			<input
-				bind:value={unit}
-				aria-label="Unit (optional)"
-				placeholder="treats"
-				class="field w-28 shrink-0"
-			/>
-			<button type="submit" class="btn btn-primary">Save</button>
-			<button type="button" onclick={cancel} class="btn btn-ghost">Cancel</button>
-			{#if error}<p role="alert" class="w-full text-sm text-red-600">{error}</p>{/if}
+		<form onsubmit={save} class="mt-2 flex flex-col gap-2">
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-start">
+				<input
+					bind:value={name}
+					aria-label="Counter name"
+					aria-invalid={error !== ''}
+					class="field {error !== '' ? 'field-invalid' : ''} w-full sm:flex-1"
+				/>
+				<input
+					bind:value={unit}
+					aria-label="Unit (optional)"
+					placeholder="treats"
+					class="field w-full sm:w-28 sm:shrink-0"
+				/>
+			</div>
+			<div class="flex gap-2">
+				<button type="submit" class="btn btn-primary flex-1 sm:flex-none">Save</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary flex-1 sm:flex-none">
+					Cancel
+				</button>
+			</div>
+			{#if error}<p role="alert" class="text-sm text-red-600">{error}</p>{/if}
 		</form>
 	{:else}
 		<div class="mt-1 flex flex-wrap items-center justify-between gap-3">
@@ -104,11 +110,13 @@
 					Its {$entryCount} entries go with it. This cannot be undone.
 				{/if}
 			</p>
-			<div class="mt-3 flex flex-wrap gap-2">
-				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm">
+			<div class="mt-3 flex gap-2">
+				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm flex-1 sm:flex-none">
 					Delete counter
 				</button>
-				<button type="button" onclick={cancel} class="btn btn-ghost btn-sm">Cancel</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+					Cancel
+				</button>
 			</div>
 		</div>
 	{/if}

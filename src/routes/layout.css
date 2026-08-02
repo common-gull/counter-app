@@ -10,9 +10,10 @@
 		@apply rounded-xl border border-gray-200 bg-white shadow-sm;
 	}
 
+	/* min-h keeps tap targets close to the 44px touch guideline. */
 	.btn {
-		@apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2
-			text-sm font-medium transition
+		@apply inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg
+			px-4 py-2 text-sm font-medium transition
 			focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900;
 	}
 
@@ -33,7 +34,12 @@
 	}
 
 	.btn-sm {
-		@apply px-3 py-1 text-sm;
+		@apply min-h-9 px-3 py-1.5 text-sm;
+	}
+
+	/* Full width on narrow screens, natural width once there is room. */
+	.btn-block {
+		@apply w-full sm:w-auto;
 	}
 
 	.field {

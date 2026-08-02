@@ -50,49 +50,65 @@
 
 <li class="group px-4 py-2.5">
 	{#if mode === 'edit'}
-		<form onsubmit={save} class="flex flex-wrap items-center gap-2">
-			<input
-				bind:value={amount}
-				aria-label="Amount"
-				inputmode="decimal"
-				class="field {error !== '' ? 'field-invalid' : ''} w-24 py-1"
-			/>
-			<input
-				bind:value={when}
-				type="datetime-local"
-				aria-label="Date and time"
-				class="field w-auto flex-1 py-1"
-			/>
-			<button type="submit" class="btn btn-primary btn-sm">Save</button>
-			<button type="button" onclick={cancel} class="btn btn-ghost btn-sm">Cancel</button>
-			{#if error}<p role="alert" class="w-full text-sm text-red-600">{error}</p>{/if}
+		<!--
+			Stacked below `sm`: a datetime-local input has a wide intrinsic minimum and
+			will not share a row with the amount and both buttons on a phone.
+		-->
+		<form onsubmit={save} class="flex flex-col gap-2">
+			<div class="flex gap-2">
+				<input
+					bind:value={amount}
+					aria-label="Amount"
+					inputmode="decimal"
+					class="field {error !== '' ? 'field-invalid' : ''} w-20 shrink-0 py-1.5"
+				/>
+				<input
+					bind:value={when}
+					type="datetime-local"
+					aria-label="Date and time"
+					class="field min-w-0 flex-1 py-1.5"
+				/>
+			</div>
+			<div class="flex gap-2">
+				<button type="submit" class="btn btn-primary btn-sm flex-1 sm:flex-none">Save</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+					Cancel
+				</button>
+			</div>
+			{#if error}<p role="alert" class="text-sm text-red-600">{error}</p>{/if}
 		</form>
 	{:else if mode === 'confirming-delete'}
-		<div class="flex flex-wrap items-center justify-between gap-2">
+		<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 			<span class="text-sm font-medium text-gray-900">Delete this entry?</span>
 			<span class="flex gap-2">
-				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm">Delete</button>
-				<button type="button" onclick={cancel} class="btn btn-ghost btn-sm">Keep</button>
+				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm flex-1 sm:flex-none">
+					Delete
+				</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+					Keep
+				</button>
 			</span>
 		</div>
 	{:else}
-		<div class="flex items-center justify-between gap-3">
-			<span class="text-sm tabular-nums text-gray-500">{formatTimeOfDay(entry.timestamp)}</span>
-
-			<span class="flex items-center gap-3">
-				<span class="font-medium tabular-nums">
+		<div class="flex items-center justify-between gap-2">
+			<span class="flex min-w-0 items-baseline gap-3">
+				<span class="shrink-0 text-sm tabular-nums text-gray-500">
+					{formatTimeOfDay(entry.timestamp)}
+				</span>
+				<span class="min-w-0 truncate font-medium tabular-nums">
 					{entry.amount}{#if unit}<span class="ml-1 text-sm font-normal text-gray-500">{unit}</span
 						>{/if}
 				</span>
-				<!-- Kept discoverable on touch, where hover never happens. -->
-				<span class="flex gap-1 opacity-60 transition group-hover:opacity-100">
-					<button type="button" onclick={startEditing} class="btn btn-ghost btn-sm">Edit</button>
-					<button
-						type="button"
-						onclick={() => (mode = 'confirming-delete')}
-						class="btn btn-ghost btn-sm">Delete</button
-					>
-				</span>
+			</span>
+
+			<!-- Kept at partial opacity rather than hidden: touch has no hover. -->
+			<span class="flex shrink-0 gap-0.5 opacity-70 transition group-hover:opacity-100">
+				<button type="button" onclick={startEditing} class="btn btn-ghost btn-sm px-2">Edit</button>
+				<button
+					type="button"
+					onclick={() => (mode = 'confirming-delete')}
+					class="btn btn-ghost btn-sm px-2">Delete</button
+				>
 			</span>
 		</div>
 	{/if}
