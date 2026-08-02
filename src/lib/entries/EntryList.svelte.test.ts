@@ -1,4 +1,5 @@
-import { flushSync, mount, unmount } from 'svelte';
+import { mount, unmount } from 'svelte';
+import { button, clearBody, waitForText, waitUntil } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -15,33 +16,13 @@ beforeEach(async () => {
 	await resetDatabase();
 	counterId = await addCounter({ name: 'Cat treats' }, T0);
 });
-afterEach(() => {
-	document.body.innerHTML = '';
-});
+afterEach(clearBody);
 
 function render() {
 	return mount(EntryList, { target: document.body, props: { counterId, now: NOW } });
 }
 
-async function waitForText(text: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!document.body.textContent?.includes(text)) {
-		if (Date.now() > deadline) {
-			throw new Error(`timed out waiting for "${text}"; saw "${document.body.textContent}"`);
-		}
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-}
-
 const headings = () => [...document.body.querySelectorAll('h3')].map((h) => h.textContent!.trim());
-
-async function waitForRows(count: number, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (document.body.querySelectorAll('li').length !== count) {
-		if (Date.now() > deadline) throw new Error(`timed out waiting for ${count} rows`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-}
 
 describe('EntryList', () => {
 	it('shows an empty state when nothing is logged', async () => {
@@ -107,12 +88,11 @@ describe('EntryList', () => {
 		await waitForText('Today');
 		expect(document.body.querySelectorAll('li')).toHaveLength(2);
 
-		const row = document.body.querySelector('li')!;
-		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
-		flushSync();
-		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+		button('Delete').click();
+		await waitForText('Delete this entry?');
+		button('Delete').click();
 
-		await waitForRows(1);
+		await waitUntil(() => document.body.querySelectorAll('li').length === 1, 'one row');
 		expect(document.body.querySelectorAll('li')).toHaveLength(1);
 		unmount(component);
 	});
@@ -122,10 +102,9 @@ describe('EntryList', () => {
 		const component = render();
 		await waitForText('Today');
 
-		const row = document.body.querySelector('li')!;
-		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
-		flushSync();
-		[...row.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Delete')!.click();
+		button('Delete').click();
+		await waitForText('Delete this entry?');
+		button('Delete').click();
 
 		await waitForText('Nothing logged yet');
 		expect(headings()).toEqual([]);

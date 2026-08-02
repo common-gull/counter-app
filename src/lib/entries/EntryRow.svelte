@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { formatCount, formatTimeOfDay, fromDateTimeLocal, toDateTimeLocal } from '../format';
+	import { formatCount, formatTimeOfDay, toDateTimeLocal } from '../format';
 	import { deleteEntry, updateEntry } from './queries';
 	import type { Entry } from './types';
-	import { validateAmount } from './validate';
+	import { validateAmount, validateTimestamp } from './validate';
 
 	let { entry, unit }: { entry: Entry; unit?: string } = $props();
 
@@ -32,13 +32,13 @@
 			error = checkedAmount.error;
 			return;
 		}
-		const timestamp = fromDateTimeLocal(when);
-		if (timestamp === null) {
-			error = 'Enter a valid date and time.';
+		const checkedWhen = validateTimestamp(when);
+		if (!checkedWhen.ok) {
+			error = checkedWhen.error;
 			return;
 		}
 
-		await updateEntry(entry.id, { amount: checkedAmount.value, timestamp });
+		await updateEntry(entry.id, { amount: checkedAmount.value, timestamp: checkedWhen.value });
 		mode = 'view';
 		error = '';
 	}
@@ -60,7 +60,8 @@
 					bind:value={amount}
 					aria-label="Amount"
 					inputmode="decimal"
-					class="field {error !== '' ? 'field-invalid' : ''} w-20 shrink-0 py-1.5"
+					aria-invalid={error !== ''}
+					class="field w-20 shrink-0 py-1.5"
 				/>
 				<input
 					bind:value={when}
@@ -70,23 +71,21 @@
 				/>
 			</div>
 			<div class="flex gap-2">
-				<button type="submit" class="btn btn-primary btn-sm flex-1 sm:flex-none">Save</button>
-				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+				<button type="submit" class="btn btn-primary btn-sm btn-grow">Save</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm btn-grow">
 					Cancel
 				</button>
 			</div>
-			{#if error}<p role="alert" class="text-sm text-red-600">{error}</p>{/if}
+			{#if error}<p role="alert" class="error-text">{error}</p>{/if}
 		</form>
 	{:else if mode === 'confirming-delete'}
 		<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 			<span class="text-sm font-medium text-gray-900">Delete this entry?</span>
 			<span class="flex gap-2">
-				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm flex-1 sm:flex-none">
+				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm btn-grow">
 					Delete
 				</button>
-				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
-					Keep
-				</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm btn-grow">Keep</button>
 			</span>
 		</div>
 	{:else}

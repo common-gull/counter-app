@@ -16,4 +16,4 @@
 </script>
 
 <button type="button" onclick={download} class="btn btn-primary btn-block">Download backup</button>
-{#if error}<p role="alert" class="mt-3 text-sm text-red-600">{error}</p>{/if}
+{#if error}<p role="alert" class="error-text">{error}</p>{/if}

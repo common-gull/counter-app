@@ -19,10 +19,13 @@ export function getCounter(id: number): Promise<Counter | undefined> {
 export function addCounter(input: NewCounter, at?: number): Promise<number> {
 	return db.transaction('rw', db.counters, async () => {
 		const last = await db.counters.orderBy('sortOrder').last();
+		// An absent or empty unit means "no unit", the same as it does in
+		// updateCounter — otherwise callers could persist `unit: ''`, which renders as
+		// nothing but shows up in exports.
+		const unit = input.unit?.trim();
 		return db.counters.add({
 			name: input.name,
-			// Omitted rather than stored as undefined, so exports stay clean.
-			...(input.unit === undefined ? {} : { unit: input.unit }),
+			...(unit ? { unit } : {}),
 			createdAt: at ?? Date.now(),
 			sortOrder: last ? last.sortOrder + 1 : 0
 		});
@@ -47,10 +50,8 @@ export async function updateCounter(id: number, patch: CounterPatch): Promise<vo
 
 		const next: Counter = { ...counter };
 		if (patch.name !== undefined) next.name = patch.name;
-		if (patch.unit !== undefined) {
-			if (patch.unit === '') delete next.unit;
-			else next.unit = patch.unit;
-		}
+		if (patch.unit === '') delete next.unit;
+		else if (patch.unit !== undefined) next.unit = patch.unit;
 		await db.counters.put(next);
 	});
 }

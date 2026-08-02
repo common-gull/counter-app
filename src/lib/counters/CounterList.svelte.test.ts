@@ -1,4 +1,5 @@
 import { mount, unmount } from 'svelte';
+import { clearBody, waitForText } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { logEntry } from '../entries/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -10,19 +11,7 @@ const NOW = new Date('2025-06-18T12:00:00-04:00');
 const T0 = NOW.getTime();
 
 beforeEach(resetDatabase);
-afterEach(() => {
-	document.body.innerHTML = '';
-});
-
-async function waitForText(text: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!document.body.textContent?.includes(text)) {
-		if (Date.now() > deadline) {
-			throw new Error(`timed out waiting for "${text}"; saw "${document.body.textContent}"`);
-		}
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-}
+afterEach(clearBody);
 
 describe('CounterList', () => {
 	it('shows an empty state when there are no counters', async () => {

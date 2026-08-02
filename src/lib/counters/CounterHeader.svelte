@@ -3,7 +3,7 @@
 	import { countEntries } from '../entries/queries';
 	import { deleteCounter, updateCounter } from './queries';
 	import type { Counter } from './types';
-	import { validateCounterName, validateUnit } from './validate';
+	import { validateCounterFields } from './validate';
 
 	// `ondeleted` rather than navigating here, so the component stays testable
 	// without a router.
@@ -32,19 +32,14 @@
 	async function save(event: SubmitEvent) {
 		event.preventDefault();
 
-		const checkedName = validateCounterName(name);
-		if (!checkedName.ok) {
-			error = checkedName.error;
-			return;
-		}
-		const checkedUnit = validateUnit(unit);
-		if (!checkedUnit.ok) {
-			error = checkedUnit.error;
+		const checked = validateCounterFields(name, unit);
+		if (!checked.ok) {
+			error = checked.error;
 			return;
 		}
 
 		// An empty unit is meaningful here: it clears one that was set before.
-		await updateCounter(counter.id, { name: checkedName.value, unit: checkedUnit.value });
+		await updateCounter(counter.id, checked.value);
 		mode = 'view';
 		error = '';
 	}
@@ -65,22 +60,22 @@
 					bind:value={name}
 					aria-label="Counter name"
 					aria-invalid={error !== ''}
-					class="field {error !== '' ? 'field-invalid' : ''} w-full sm:flex-1"
+					class="field sm:flex-1"
 				/>
 				<input
 					bind:value={unit}
 					aria-label="Unit (optional)"
 					placeholder="treats"
-					class="field w-full sm:w-28 sm:shrink-0"
+					class="field sm:w-28 sm:shrink-0"
 				/>
 			</div>
 			<div class="flex gap-2">
-				<button type="submit" class="btn btn-primary flex-1 sm:flex-none">Save</button>
-				<button type="button" onclick={cancel} class="btn btn-secondary flex-1 sm:flex-none">
+				<button type="submit" class="btn btn-primary btn-grow">Save</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-grow">
 					Cancel
 				</button>
 			</div>
-			{#if error}<p role="alert" class="text-sm text-red-600">{error}</p>{/if}
+			{#if error}<p role="alert" class="error-text">{error}</p>{/if}
 		</form>
 	{:else}
 		<div class="mt-1 flex flex-wrap items-center justify-between gap-3">
@@ -102,21 +97,18 @@
 			<p class="mt-1 text-sm text-red-800">
 				{#if $entryCount === undefined}
 					Checking what will be removed…
-				{:else if $entryCount === 0}
-					It has no entries. This cannot be undone.
-				{:else if $entryCount === 1}
-					Its 1 entry goes with it. This cannot be undone.
 				{:else}
-					Its {$entryCount} entries go with it. This cannot be undone.
+					{$entryCount === 0
+						? 'It has no entries.'
+						: `Its ${$entryCount} ${$entryCount === 1 ? 'entry goes' : 'entries go'} with it.`}
+					This cannot be undone.
 				{/if}
 			</p>
 			<div class="mt-3 flex gap-2">
-				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm flex-1 sm:flex-none">
+				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm btn-grow">
 					Delete counter
 				</button>
-				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
-					Cancel
-				</button>
+				<button type="button" onclick={cancel} class="btn btn-secondary btn-sm btn-grow">Cancel</button>
 			</div>
 		</div>
 	{/if}

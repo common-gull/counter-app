@@ -1,3 +1,4 @@
+import { fromDateTimeLocal } from '../format';
 import type { Validated } from '../validation';
 
 /**
@@ -12,5 +13,16 @@ export function validateAmount(raw: string): Validated<number> {
 	if (!Number.isFinite(value)) return { ok: false, error: 'Enter a number.' };
 	if (value <= 0) return { ok: false, error: 'Enter an amount greater than zero.' };
 
+	return { ok: true, value };
+}
+
+/**
+ * A `datetime-local` value, as UTC epoch ms. The rule and its wording live here rather
+ * than in the row component, so they are node-testable and the next form that edits a
+ * timestamp gets the same behaviour.
+ */
+export function validateTimestamp(raw: string): Validated<number> {
+	const value = fromDateTimeLocal(raw);
+	if (value === null) return { ok: false, error: 'Enter a valid date and time.' };
 	return { ok: true, value };
 }

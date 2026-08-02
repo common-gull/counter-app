@@ -1,4 +1,5 @@
 import { mount, unmount } from 'svelte';
+import { clearBody, waitUntil } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -16,25 +17,22 @@ beforeEach(async () => {
 	await resetDatabase();
 	counterId = await addCounter({ name: 'Cat treats' }, T0);
 });
-afterEach(() => {
-	document.body.innerHTML = '';
-});
+afterEach(clearBody);
 
 function render() {
 	return mount(TotalsBar, { target: document.body, props: { counterId, now: NOW } });
 }
 
+async function waitForFigures(expected: string[]) {
+	await waitUntil(
+		() => JSON.stringify(figures()) === JSON.stringify(expected),
+		`figures ${JSON.stringify(expected)}`
+	);
+}
+
 /** The three figures, in day / week / month order. */
 function figures(): string[] {
 	return [...document.body.querySelectorAll('dd')].map((dd) => dd.textContent!.trim());
-}
-
-async function waitForFigures(expected: string[], timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (JSON.stringify(figures()) !== JSON.stringify(expected)) {
-		if (Date.now() > deadline) throw new Error(`timed out; saw ${JSON.stringify(figures())}`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
 }
 
 describe('TotalsBar', () => {
@@ -99,11 +97,7 @@ describe('TotalsBar', () => {
 			props: { counterId, unit: 'treats', now: NOW }
 		});
 
-		const deadline = Date.now() + 2000;
-		while (!document.body.textContent?.includes('5')) {
-			if (Date.now() > deadline) throw new Error('timed out waiting for the figure');
-			await new Promise((resolve) => setTimeout(resolve, 5));
-		}
+		await waitUntil(() => document.body.textContent?.includes('5') ?? false, 'the figure');
 
 		// Sharing a baseline made "13 treats" read as one blob and knocked the three
 		// tiles out of alignment once the figures differed in width.

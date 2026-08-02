@@ -53,9 +53,7 @@
 			error = 'Could not restore that backup.';
 			return;
 		}
-		// Not reset(), which would wipe the message we are about to show.
-		clearSelection();
-		error = '';
+		reset();
 		done = `Restored ${counters.length} counters and ${entries.length} entries.`;
 	}
 </script>
@@ -84,7 +82,7 @@
 	{/if}
 </div>
 
-{#if error}<p role="alert" class="mt-3 text-sm text-red-600">{error}</p>{/if}
+{#if error}<p role="alert" class="error-text">{error}</p>{/if}
 {#if done}
 	<p role="status" class="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
 		{done}
@@ -98,10 +96,10 @@
 			Restore {pending.counters.length} counters and {pending.entries.length} entries?
 		</p>
 		<div class="mt-3 flex gap-2">
-			<button type="button" onclick={confirmImport} class="btn btn-danger btn-sm flex-1 sm:flex-none">
+			<button type="button" onclick={confirmImport} class="btn btn-danger btn-sm btn-grow">
 				Replace my data
 			</button>
-			<button type="button" onclick={reset} class="btn btn-secondary btn-sm flex-1 sm:flex-none">
+			<button type="button" onclick={reset} class="btn btn-secondary btn-sm btn-grow">
 				Cancel
 			</button>
 		</div>

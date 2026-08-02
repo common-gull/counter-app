@@ -2,6 +2,7 @@ import { mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addCounter } from '$lib/counters/queries';
 import { logEntry } from '$lib/entries/queries';
+import { clearBody, waitForText } from '$lib/testing/dom';
 import { resetDatabase } from '$lib/testing/reset-db';
 
 // Hoisted so the mock factory below can reach it, and mutable so each test can point
@@ -17,19 +18,7 @@ const CounterPage = (await import('./+page.svelte')).default;
 const T0 = new Date('2025-06-18T12:00:00-04:00').getTime();
 
 beforeEach(resetDatabase);
-afterEach(() => {
-	document.body.innerHTML = '';
-});
-
-async function waitForText(text: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!document.body.textContent?.includes(text)) {
-		if (Date.now() > deadline) {
-			throw new Error(`timed out waiting for "${text}"; saw "${document.body.textContent}"`);
-		}
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-}
+afterEach(clearBody);
 
 describe('counter detail page', () => {
 	it('renders the counter name from the route id', async () => {

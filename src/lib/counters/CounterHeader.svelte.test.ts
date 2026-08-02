@@ -1,4 +1,14 @@
 import { flushSync, mount, unmount } from 'svelte';
+import {
+	clearBody,
+	click,
+	field,
+	submitForm,
+	type,
+	visibleText,
+	waitForText,
+	waitUntil
+} from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { countEntries, logEntry } from '../entries/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -15,9 +25,7 @@ beforeEach(async () => {
 	const id = await addCounter({ name: 'Cat treats' }, T0);
 	counter = (await getCounter(id))!;
 });
-afterEach(() => {
-	document.body.innerHTML = '';
-});
+afterEach(clearBody);
 
 function render(ondeleted?: () => void) {
 	const component = mount(CounterHeader, {
@@ -26,58 +34,6 @@ function render(ondeleted?: () => void) {
 	});
 	flushSync();
 	return component;
-}
-
-function button(label: string): HTMLButtonElement {
-	const match = [...document.body.querySelectorAll('button')].find(
-		(b) => b.textContent?.trim() === label
-	);
-	if (!match) throw new Error(`no button labelled "${label}"`);
-	return match;
-}
-
-function click(label: string) {
-	button(label).click();
-	flushSync();
-}
-
-function field(label: string): HTMLInputElement {
-	return document.body.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)!;
-}
-
-const nameField = () => field('Counter name');
-
-function type(value: string, label = 'Counter name') {
-	const input = field(label);
-	input.value = value;
-	input.dispatchEvent(new Event('input', { bubbles: true }));
-	flushSync();
-}
-
-function submitForm() {
-	document.body.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
-}
-
-async function waitUntil(ready: () => Promise<boolean>, label: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!(await ready())) {
-		if (Date.now() > deadline) throw new Error(`timed out waiting for ${label}`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-	flushSync();
-}
-
-/** Svelte splits interpolated copy across text nodes, so compare on collapsed whitespace. */
-const visibleText = () => document.body.textContent?.replace(/\s+/g, ' ').trim() ?? '';
-
-async function waitForText(text: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!visibleText().includes(text)) {
-		if (Date.now() > deadline) {
-			throw new Error(`timed out waiting for "${text}"; saw "${visibleText()}"`);
-		}
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
 }
 
 describe('CounterHeader', () => {
@@ -92,14 +48,14 @@ describe('CounterHeader editing', () => {
 	it('pre-fills the current name', () => {
 		const component = render();
 		click('Edit');
-		expect(nameField().value).toBe('Cat treats');
+		expect(field('Counter name').value).toBe('Cat treats');
 		unmount(component);
 	});
 
 	it('saves a new name', async () => {
 		const component = render();
 		click('Edit');
-		type('Dog treats');
+		type('Counter name', 'Dog treats');
 		submitForm();
 
 		await waitUntil(async () => (await getCounter(counter.id))?.name === 'Dog treats', 'the rename');
@@ -110,7 +66,7 @@ describe('CounterHeader editing', () => {
 	it('trims the new name', async () => {
 		const component = render();
 		click('Edit');
-		type('   Dog treats   ');
+		type('Counter name', '   Dog treats   ');
 		submitForm();
 
 		await waitUntil(async () => (await getCounter(counter.id))?.name === 'Dog treats', 'the rename');
@@ -121,7 +77,7 @@ describe('CounterHeader editing', () => {
 	it('rejects an empty name and saves nothing', async () => {
 		const component = render();
 		click('Edit');
-		type('   ');
+		type('Counter name', '   ');
 		submitForm();
 		flushSync();
 
@@ -133,7 +89,7 @@ describe('CounterHeader editing', () => {
 	it('discards changes on cancel', async () => {
 		const component = render();
 		click('Edit');
-		type('Something else');
+		type('Counter name', 'Something else');
 		click('Cancel');
 
 		expect(document.body.querySelector('form')).toBeNull();
@@ -162,7 +118,7 @@ describe('CounterHeader editing', () => {
 	it('changes the unit', async () => {
 		const component = render();
 		click('Edit');
-		type('treats', 'Unit (optional)');
+		type('Unit (optional)', 'treats');
 		submitForm();
 
 		await waitUntil(async () => (await getCounter(counter.id))?.unit === 'treats', 'the new unit');
@@ -176,7 +132,7 @@ describe('CounterHeader editing', () => {
 		const component = render();
 
 		click('Edit');
-		type('', 'Unit (optional)');
+		type('Unit (optional)', '');
 		submitForm();
 
 		await waitUntil(async () => (await getCounter(id))?.unit === undefined, 'the unit to clear');
@@ -187,8 +143,8 @@ describe('CounterHeader editing', () => {
 	it('changes name and unit together', async () => {
 		const component = render();
 		click('Edit');
-		type('Dog treats');
-		type('biscuits', 'Unit (optional)');
+		type('Counter name', 'Dog treats');
+		type('Unit (optional)', 'biscuits');
 		submitForm();
 
 		await waitUntil(async () => (await getCounter(counter.id))?.unit === 'biscuits', 'the update');
@@ -202,7 +158,7 @@ describe('CounterHeader editing', () => {
 	it('rejects an overlong unit and saves nothing', async () => {
 		const component = render();
 		click('Edit');
-		type('x'.repeat(50), 'Unit (optional)');
+		type('Unit (optional)', 'x'.repeat(50));
 		submitForm();
 		flushSync();
 

@@ -34,12 +34,17 @@
 	}
 
 	.btn-sm {
-		@apply min-h-9 px-3 py-1.5 text-sm;
+		@apply min-h-9 px-3 py-1.5;
 	}
 
 	/* Full width on narrow screens, natural width once there is room. */
 	.btn-block {
 		@apply w-full sm:w-auto;
+	}
+
+	/* Same intent as .btn-block for a button that is a flex child. */
+	.btn-grow {
+		@apply flex-1 sm:flex-none;
 	}
 
 	.field {
@@ -48,8 +53,17 @@
 			focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 focus:outline-none;
 	}
 
-	.field-invalid {
+	/*
+	 * Keyed off the attribute rather than a separate class, so marking a field invalid
+	 * is one switch. With two, a call site can set the colour without ever announcing
+	 * the field as invalid to assistive tech.
+	 */
+	.field[aria-invalid='true'] {
 		@apply border-red-400 focus:border-red-500 focus:ring-red-500/10;
+	}
+
+	.error-text {
+		@apply mt-2 text-sm text-red-600;
 	}
 
 	.page-title {

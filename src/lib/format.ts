@@ -3,24 +3,41 @@ import { dayKey, startOfLocalDay } from './time';
 /**
  * Display formatting. `locale` defaults to the browser's; tests pass one explicitly so
  * assertions don't depend on the machine's locale.
+ *
+ * Formatters are cached per locale. Constructing an Intl formatter costs roughly forty
+ * times more than using one, and these run for every history row on every write.
  */
 
-/** Thousands separators, so a large total stays readable. */
-export function formatCount(value: number, locale?: string): string {
-	return new Intl.NumberFormat(locale).format(value);
-}
+const numberFormats = new Map<string | undefined, Intl.NumberFormat>();
+const timeFormats = new Map<string | undefined, Intl.DateTimeFormat>();
+const dateFormats = new Map<string | undefined, Intl.DateTimeFormat>();
 
-export function formatTimeOfDay(ts: number, locale?: string): string {
-	return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(ts);
+function cached<T>(cache: Map<string | undefined, T>, locale: string | undefined, make: () => T): T {
+	let formatter = cache.get(locale);
+	if (formatter === undefined) cache.set(locale, (formatter = make()));
+	return formatter;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+/** Thousands separators, so a large total stays readable. */
+export function formatCount(value: number, locale?: string): string {
+	return cached(numberFormats, locale, () => new Intl.NumberFormat(locale)).format(value);
+}
+
+export function formatTimeOfDay(ts: number, locale?: string): string {
+	const format = cached(
+		timeFormats,
+		locale,
+		() => new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' })
+	);
+	return format.format(ts);
+}
+
 /** Local `YYYY-MM-DDTHH:mm`, the value format an `<input type="datetime-local">` wants. */
 export function toDateTimeLocal(ts: number): string {
 	const d = new Date(ts);
-	const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-	return `${date}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	return `${dayKey(ts)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /**
@@ -54,9 +71,10 @@ export function formatDayHeading(ts: number, now: Date, locale?: string): string
 	yesterday.setDate(yesterday.getDate() - 1);
 	if (key === dayKey(yesterday.getTime())) return 'Yesterday';
 
-	return new Intl.DateTimeFormat(locale, {
-		weekday: 'short',
-		day: 'numeric',
-		month: 'short'
-	}).format(ts);
+	const format = cached(
+		dateFormats,
+		locale,
+		() => new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short' })
+	);
+	return format.format(ts);
 }

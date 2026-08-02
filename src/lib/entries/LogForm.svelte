@@ -34,9 +34,9 @@
 			inputmode="decimal"
 			placeholder={unit ? `How many ${unit}?` : 'How many?'}
 			aria-invalid={error !== ''}
-			class="field {error !== '' ? 'field-invalid' : ''} min-w-0 flex-1"
+			class="field min-w-0 flex-1"
 		/>
 		<button type="submit" class="btn btn-primary shrink-0 px-6">Log</button>
 	</div>
-	{#if error}<p role="alert" class="mt-2 text-sm text-red-600">{error}</p>{/if}
+	{#if error}<p role="alert" class="error-text">{error}</p>{/if}
 </form>

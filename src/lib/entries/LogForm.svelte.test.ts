@@ -1,4 +1,5 @@
 import { flushSync, mount, unmount } from 'svelte';
+import { clearBody, field, submitForm, type, waitFor } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -7,44 +8,20 @@ import { listEntries } from './queries';
 
 let counterId: number;
 
+const waitForEntries = (count: number) =>
+	waitFor(() => listEntries(counterId), (entries) => entries.length === count, `${count} entries`);
+
 beforeEach(async () => {
 	await resetDatabase();
 	counterId = await addCounter({ name: 'Cat treats' }, 1_750_000_000_000);
 });
-afterEach(() => {
-	document.body.innerHTML = '';
-});
-
-function amountField(): HTMLInputElement {
-	return document.body.querySelector<HTMLInputElement>('input[aria-label="Amount"]')!;
-}
-
-function type(value: string) {
-	const input = amountField();
-	input.value = value;
-	input.dispatchEvent(new Event('input', { bubbles: true }));
-	flushSync();
-}
-
-function submitForm() {
-	document.body.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
-}
-
-async function waitForEntries(count: number, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	for (;;) {
-		const entries = await listEntries(counterId);
-		if (entries.length === count) return entries;
-		if (Date.now() > deadline) throw new Error(`timed out waiting for ${count} entries`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-}
+afterEach(clearBody);
 
 describe('LogForm', () => {
 	it('logs an amount', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('3');
+		type('Amount', '3');
 		submitForm();
 
 		const entries = await waitForEntries(1);
@@ -55,7 +32,7 @@ describe('LogForm', () => {
 	it('logs a fractional amount', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('1.5');
+		type('Amount', '1.5');
 		submitForm();
 
 		const entries = await waitForEntries(1);
@@ -66,19 +43,19 @@ describe('LogForm', () => {
 	it('clears the field after logging', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('3');
+		type('Amount', '3');
 		submitForm();
 		await waitForEntries(1);
 		flushSync();
 
-		expect(amountField().value).toBe('');
+		expect(field('Amount').value).toBe('');
 		unmount(component);
 	});
 
 	it('rejects zero and saves nothing', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('0');
+		type('Amount', '0');
 		submitForm();
 		flushSync();
 
@@ -90,7 +67,7 @@ describe('LogForm', () => {
 	it('rejects text and saves nothing', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('lots');
+		type('Amount', 'lots');
 		submitForm();
 		flushSync();
 
@@ -102,12 +79,12 @@ describe('LogForm', () => {
 	it('clears the error once a valid amount is logged', async () => {
 		const component = mount(LogForm, { target: document.body, props: { counterId } });
 
-		type('0');
+		type('Amount', '0');
 		submitForm();
 		flushSync();
 		expect(document.body.querySelector('[role="alert"]')).not.toBeNull();
 
-		type('2');
+		type('Amount', '2');
 		submitForm();
 		await waitForEntries(1);
 		flushSync();
@@ -121,7 +98,7 @@ describe('LogForm', () => {
 			target: document.body,
 			props: { counterId, unit: 'treats' }
 		});
-		expect(amountField().placeholder).toBe('How many treats?');
+		expect(field('Amount').placeholder).toBe('How many treats?');
 		unmount(component);
 	});
 });

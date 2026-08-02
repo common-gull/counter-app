@@ -1,4 +1,5 @@
 import { flushSync, mount, unmount } from 'svelte';
+import { clearBody, click, field, submitForm, type, waitFor } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
@@ -17,50 +18,10 @@ beforeEach(async () => {
 	await logEntry(counterId, 3, T0);
 	entry = (await listEntries(counterId))[0]!;
 });
-afterEach(() => {
-	document.body.innerHTML = '';
-});
+afterEach(clearBody);
 
 function render(unit?: string) {
 	return mount(EntryRow, { target: document.body, props: { entry, unit } });
-}
-
-function button(label: string): HTMLButtonElement {
-	const match = [...document.body.querySelectorAll('button')].find(
-		(b) => b.textContent?.trim() === label
-	);
-	if (!match) throw new Error(`no button labelled "${label}"`);
-	return match;
-}
-
-function click(label: string) {
-	button(label).click();
-	flushSync();
-}
-
-function field(label: string): HTMLInputElement {
-	return document.body.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)!;
-}
-
-function type(label: string, value: string) {
-	const input = field(label);
-	input.value = value;
-	input.dispatchEvent(new Event('input', { bubbles: true }));
-	flushSync();
-}
-
-function submitForm() {
-	document.body.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
-}
-
-async function waitFor<T>(read: () => Promise<T>, ready: (value: T) => boolean, label: string) {
-	const deadline = Date.now() + 2000;
-	for (;;) {
-		const value = await read();
-		if (ready(value)) return value;
-		if (Date.now() > deadline) throw new Error(`timed out waiting for ${label}`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
 }
 
 const currentEntries = () => listEntries(counterId);

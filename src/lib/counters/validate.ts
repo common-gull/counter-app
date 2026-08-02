@@ -13,6 +13,20 @@ export function validateCounterName(raw: string): Validated<string> {
 	return { ok: true, value };
 }
 
+/** Both counter forms edit the same pair of fields, so they check them the same way. */
+export function validateCounterFields(
+	name: string,
+	unit: string
+): Validated<{ name: string; unit: string }> {
+	const checkedName = validateCounterName(name);
+	if (!checkedName.ok) return checkedName;
+
+	const checkedUnit = validateUnit(unit);
+	if (!checkedUnit.ok) return checkedUnit;
+
+	return { ok: true, value: { name: checkedName.value, unit: checkedUnit.value } };
+}
+
 /**
  * The unit is optional, so an empty result is valid and means "no unit". It is capped
  * because it renders inline beside every total.

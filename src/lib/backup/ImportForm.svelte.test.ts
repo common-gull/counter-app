@@ -1,4 +1,5 @@
 import { flushSync, mount, unmount } from 'svelte';
+import { button, clearBody, settle, waitUntil } from '../testing/dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addCounter, listCounters } from '../counters/queries';
 import { listEntries } from '../entries/queries';
@@ -20,9 +21,7 @@ const backup: Backup = {
 };
 
 beforeEach(resetDatabase);
-afterEach(() => {
-	document.body.innerHTML = '';
-});
+afterEach(clearBody);
 
 /** Mount and flush, so `bind:this` is populated before anything is dispatched. */
 function render() {
@@ -41,31 +40,7 @@ async function choose(contents: string, name = 'backup.json') {
 	const file = new File([contents], name, { type: 'application/json' });
 	Object.defineProperty(input, 'files', { value: [file], configurable: true });
 	input.dispatchEvent(new Event('change', { bubbles: true }));
-	await waitForSettled();
-}
-
-/** The handler is async, so give it a turn before asserting. */
-async function waitForSettled() {
-	await new Promise((resolve) => setTimeout(resolve, 10));
-	flushSync();
-}
-
-/** Poll rather than guess at a delay; the import writes to IndexedDB. */
-async function waitUntil(ready: () => Promise<boolean>, label: string, timeoutMs = 2000) {
-	const deadline = Date.now() + timeoutMs;
-	while (!(await ready())) {
-		if (Date.now() > deadline) throw new Error(`timed out waiting for ${label}`);
-		await new Promise((resolve) => setTimeout(resolve, 5));
-	}
-	flushSync();
-}
-
-function button(label: string): HTMLButtonElement {
-	const match = [...document.body.querySelectorAll('button')].find(
-		(b) => b.textContent?.trim() === label
-	);
-	if (!match) throw new Error(`no button labelled "${label}"`);
-	return match;
+	await settle(10);
 }
 
 describe('ImportForm control', () => {
