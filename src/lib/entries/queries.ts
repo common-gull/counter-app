@@ -15,6 +15,10 @@ export function listEntries(counterId: number, limit?: number): Promise<Entry[]>
 	return limit === undefined ? newestFirst.toArray() : newestFirst.limit(limit).toArray();
 }
 
+export function countEntries(counterId: number): Promise<number> {
+	return db.entries.where('counterId').equals(counterId).count();
+}
+
 export function logEntry(counterId: number, amount: number, at?: number): Promise<number> {
 	return db.entries.add({ counterId, amount, timestamp: at ?? Date.now() });
 }

@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addCounter } from '../counters/queries';
 import { resetDatabase } from '../testing/reset-db';
-import { deleteEntry, listEntries, logEntry, totalBetween, updateEntry } from './queries';
+import {
+	countEntries,
+	deleteEntry,
+	listEntries,
+	logEntry,
+	totalBetween,
+	updateEntry
+} from './queries';
 
 const T0 = 1_750_000_000_000;
 const HOUR = 60 * 60_000;
@@ -74,6 +81,20 @@ describe('entries', () => {
 		await logEntry(counterId, 3, T0);
 		await updateEntry(9999, { amount: 100 });
 		expect((await listEntries(counterId))[0]!.amount).toBe(3);
+	});
+
+	it('counts the entries of one counter', async () => {
+		const treats = await addCounter({ name: 'Treats' }, T0);
+		const water = await addCounter({ name: 'Water' }, T0);
+		await logEntry(treats, 1, T0);
+		await logEntry(treats, 2, T0);
+		await logEntry(water, 3, T0);
+		expect(await countEntries(treats)).toBe(2);
+	});
+
+	it('counts zero for a counter with no entries', async () => {
+		const counterId = await addCounter({ name: 'Empty' }, T0);
+		expect(await countEntries(counterId)).toBe(0);
 	});
 
 	it('deletes an entry', async () => {

@@ -9,6 +9,9 @@ import { resetDatabase } from '$lib/testing/reset-db';
 const routeState = vi.hoisted(() => ({ params: { id: '0' } as Record<string, string> }));
 vi.mock('$app/state', () => ({ page: routeState }));
 
+const navigation = vi.hoisted(() => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => navigation);
+
 const CounterPage = (await import('./+page.svelte')).default;
 
 const T0 = new Date('2025-06-18T12:00:00-04:00').getTime();

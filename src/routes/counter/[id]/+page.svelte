@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { liveQuery } from 'dexie';
+	import CounterHeader from '$lib/counters/CounterHeader.svelte';
 	import { getCounter } from '$lib/counters/queries';
 	import EntryList from '$lib/entries/EntryList.svelte';
 	import LogForm from '$lib/entries/LogForm.svelte';
@@ -29,10 +31,7 @@
 		<a href="/" class="btn btn-secondary mt-4">Back to all counters</a>
 	</div>
 {:else}
-	<div class="mb-6">
-		<a href="/" class="muted hover:text-gray-900">&larr; All counters</a>
-		<h1 class="page-title mt-1 break-words">{counter.name}</h1>
-	</div>
+	<CounterHeader {counter} ondeleted={() => goto('/')} />
 
 	<div class="mb-4">
 		<LogForm counterId={counter.id} unit={counter.unit} />
