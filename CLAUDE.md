@@ -99,8 +99,10 @@ Filename suffix picks the environment:
   after interactions, `$effect.root` for effects outside a component.
   `resolve.conditions: ['browser']` on the client project is required — without it
   Svelte resolves to its server build. https://svelte.dev/docs/svelte/testing
-- **`TZ` is pinned to `America/New_York`** on the server project. Don't remove it; a
-  guard test in `time.test.ts` fails first if it goes.
+- **`TZ` is pinned to `America/New_York` on *both* projects.** Don't remove it: tests
+  assert on local times, so without it they pass on your machine and fail on a CI
+  runner in UTC. A guard test in each project (`time.test.ts`,
+  `testing/timezone.svelte.test.ts`) fails first and says so.
 - **`expect: { requireAssertions: true }`** — a test with no assertion fails.
 - **`fake-indexeddb/auto` is in `setupFiles` for both projects**, so tests hit a real
   Dexie against an in-memory IndexedDB — compound-index queries included. There are no

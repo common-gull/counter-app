@@ -40,6 +40,10 @@ export default defineConfig({
 				test: {
 					name: 'client',
 					environment: 'jsdom',
+					// Pinned for the same reason as the server project: components render
+					// local times, so without this they pass locally and fail on a CI
+					// runner in UTC.
+					env: { TZ: 'America/New_York' },
 					// jsdom has no IndexedDB; components reach the repository through it.
 					setupFiles: ['fake-indexeddb/auto'],
 					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
