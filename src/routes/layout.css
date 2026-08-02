@@ -1,36 +1,94 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+/* Driven by a class on <html>, not the media query, so an explicit choice wins. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic colours, so dark mode lives here rather than as a `dark:` variant on every
+ * component. `@theme inline` makes the utilities reference these variables directly,
+ * so overriding them under `.dark` re-themes everything that uses them.
+ */
+@theme inline {
+	--color-canvas: var(--canvas);
+	--color-surface: var(--surface);
+	--color-surface-muted: var(--surface-muted);
+	--color-ink: var(--ink);
+	--color-ink-muted: var(--ink-muted);
+	--color-ink-subtle: var(--ink-subtle);
+	--color-ink-faint: var(--ink-faint);
+	--color-line: var(--line);
+	--color-line-strong: var(--line-strong);
+	--color-accent: var(--accent);
+	--color-accent-hover: var(--accent-hover);
+	--color-accent-ink: var(--accent-ink);
+}
+
+:root {
+	color-scheme: light;
+	--canvas: #f9fafb;
+	--surface: #ffffff;
+	--surface-muted: #f3f4f6;
+	--ink: #111827;
+	--ink-muted: #4b5563;
+	--ink-subtle: #6b7280;
+	--ink-faint: #9ca3af;
+	--line: #e5e7eb;
+	--line-strong: #d1d5db;
+	--accent: #111827;
+	--accent-hover: #374151;
+	--accent-ink: #ffffff;
+}
+
+.dark {
+	/* Tells the browser to darken native widgets too — scrollbars, and the
+	   datetime-local picker the entry editor relies on. */
+	color-scheme: dark;
+	--canvas: #09090b;
+	--surface: #18181b;
+	--surface-muted: #27272a;
+	--ink: #fafafa;
+	--ink-muted: #a1a1aa;
+	--ink-subtle: #8b8b93;
+	--ink-faint: #71717a;
+	--line: #27272a;
+	--line-strong: #3f3f46;
+	--accent: #fafafa;
+	--accent-hover: #d4d4d8;
+	--accent-ink: #18181b;
+}
+
 /*
  * A handful of shared classes so buttons, cards and inputs stay consistent across
  * components instead of each one re-inventing its own spacing and colours.
  */
 @layer components {
 	.card {
-		@apply rounded-xl border border-gray-200 bg-white shadow-sm;
+		@apply rounded-xl border border-line bg-surface shadow-sm;
 	}
 
 	/* min-h keeps tap targets close to the 44px touch guideline. */
 	.btn {
 		@apply inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg
 			px-4 py-2 text-sm font-medium transition
-			focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900;
+			focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
 	}
 
 	.btn-primary {
-		@apply bg-gray-900 text-white hover:bg-gray-700;
+		@apply bg-accent text-accent-ink hover:bg-accent-hover;
 	}
 
 	.btn-secondary {
-		@apply border border-gray-300 bg-white text-gray-900 hover:bg-gray-50;
+		@apply border border-line-strong bg-surface text-ink hover:bg-surface-muted;
 	}
 
 	.btn-danger {
-		@apply bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600;
+		@apply bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600
+			dark:bg-red-500 dark:hover:bg-red-400;
 	}
 
 	.btn-ghost {
-		@apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+		@apply text-ink-muted hover:bg-surface-muted hover:text-ink;
 	}
 
 	.btn-sm {
@@ -48,9 +106,9 @@
 	}
 
 	.field {
-		@apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900
-			transition placeholder:text-gray-400
-			focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 focus:outline-none;
+		@apply w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-ink
+			transition placeholder:text-ink-faint
+			focus:border-accent focus:ring-2 focus:ring-accent/10 focus:outline-none;
 	}
 
 	/*
@@ -63,18 +121,18 @@
 	}
 
 	.error-text {
-		@apply mt-2 text-sm text-red-600;
+		@apply mt-2 text-sm text-red-600 dark:text-red-400;
 	}
 
 	.page-title {
-		@apply text-2xl font-semibold tracking-tight text-gray-900;
+		@apply text-2xl font-semibold tracking-tight text-ink;
 	}
 
 	.section-title {
-		@apply text-base font-semibold text-gray-900;
+		@apply text-base font-semibold text-ink;
 	}
 
 	.muted {
-		@apply text-sm text-gray-600;
+		@apply text-sm text-ink-muted;
 	}
 }

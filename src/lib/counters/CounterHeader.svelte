@@ -51,7 +51,7 @@
 </script>
 
 <div class="mb-6">
-	<a href="/" class="muted hover:text-gray-900">&larr; All counters</a>
+	<a href="/" class="muted hover:text-ink">&larr; All counters</a>
 
 	{#if mode === 'editing'}
 		<form onsubmit={save} class="mt-2 flex flex-col gap-2">
@@ -92,9 +92,12 @@
 	{/if}
 
 	{#if mode === 'confirming-delete'}
-		<div class="mt-3 rounded-lg border border-red-300 bg-red-50 p-4">
-			<p class="text-sm font-medium text-red-900">Delete "{counter.name}"?</p>
-			<p class="mt-1 text-sm text-red-800">
+		<div
+			class="mt-3 rounded-lg border border-red-300 bg-red-50 p-4
+				dark:border-red-500/40 dark:bg-red-500/10"
+		>
+			<p class="text-sm font-medium text-red-900 dark:text-red-200">Delete "{counter.name}"?</p>
+			<p class="mt-1 text-sm text-red-800 dark:text-red-300">
 				{#if $entryCount === undefined}
 					Checking what will be removed…
 				{:else}

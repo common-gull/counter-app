@@ -19,16 +19,16 @@
 	<p class="muted">Loading…</p>
 {:else if groups.length === 0}
 	<div class="card p-8 text-center">
-		<p class="font-medium text-gray-900">Nothing logged yet</p>
+		<p class="font-medium text-ink">Nothing logged yet</p>
 		<p class="muted mt-1">Use the box above to log your first amount.</p>
 	</div>
 {:else}
 	{#each groups as group (group.key)}
 		<section class="mb-5">
-			<h3 class="mb-1.5 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+			<h3 class="mb-1.5 text-xs font-semibold tracking-wide text-ink-subtle uppercase">
 				{formatDayHeading(group.timestamp, now)}
 			</h3>
-			<ul class="card divide-y divide-gray-100 overflow-hidden">
+			<ul class="card divide-y divide-line overflow-hidden">
 				{#each group.entries as entry (entry.id)}
 					<EntryRow {entry} {unit} />
 				{/each}

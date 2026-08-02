@@ -12,7 +12,7 @@
 	<p class="muted">Loading…</p>
 {:else if $counters.length === 0}
 	<div class="card p-8 text-center">
-		<p class="font-medium text-gray-900">No counters yet</p>
+		<p class="font-medium text-ink">No counters yet</p>
 		<p class="muted mt-1">Add one above to start tracking.</p>
 	</div>
 {:else}

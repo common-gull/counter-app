@@ -65,7 +65,7 @@
 		visually hidden input a visible focus ring.
 	-->
 	<label
-		class="btn btn-secondary btn-block focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
+		class="btn btn-secondary btn-block focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent"
 	>
 		<input
 			bind:this={input}
@@ -84,15 +84,24 @@
 
 {#if error}<p role="alert" class="error-text">{error}</p>{/if}
 {#if done}
-	<p role="status" class="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+	<p
+		role="status"
+		class="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800
+			dark:bg-green-500/10 dark:text-green-300"
+	>
 		{done}
 	</p>
 {/if}
 
 {#if pending}
-	<div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
-		<p class="text-sm font-medium text-amber-900">This replaces everything currently stored.</p>
-		<p class="mt-1 text-sm text-amber-800">
+	<div
+		class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4
+			dark:border-amber-500/40 dark:bg-amber-500/10"
+	>
+		<p class="text-sm font-medium text-amber-900 dark:text-amber-200">
+			This replaces everything currently stored.
+		</p>
+		<p class="mt-1 text-sm text-amber-800 dark:text-amber-300">
 			Restore {pending.counters.length} counters and {pending.entries.length} entries?
 		</p>
 		<div class="mt-3 flex gap-2">

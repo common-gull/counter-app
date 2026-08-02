@@ -4,6 +4,19 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
+		<script>
+			// Runs before first paint so the page never flashes the wrong theme. It
+			// duplicates a little of src/lib/theme/theme.ts on purpose: nothing from the
+			// bundle is available this early. Keep the storage key in step.
+			try {
+				const stored = localStorage.getItem('counter-app-theme');
+				const system = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				const dark = stored === 'dark' || (stored !== 'light' && system);
+				document.documentElement.classList.toggle('dark', dark);
+			} catch {
+				// Private browsing can refuse localStorage; light is a fine fallback.
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

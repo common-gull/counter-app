@@ -80,7 +80,7 @@
 		</form>
 	{:else if mode === 'confirming-delete'}
 		<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-			<span class="text-sm font-medium text-gray-900">Delete this entry?</span>
+			<span class="text-sm font-medium text-ink">Delete this entry?</span>
 			<span class="flex gap-2">
 				<button type="button" onclick={confirmDelete} class="btn btn-danger btn-sm btn-grow">
 					Delete
@@ -91,12 +91,12 @@
 	{:else}
 		<div class="flex items-center justify-between gap-2">
 			<span class="flex min-w-0 items-baseline gap-3">
-				<span class="shrink-0 text-sm tabular-nums text-gray-500">
+				<span class="shrink-0 text-sm tabular-nums text-ink-subtle">
 					{formatTimeOfDay(entry.timestamp)}
 				</span>
 				<span class="min-w-0 truncate font-medium tabular-nums">
 					{formatCount(entry.amount)}{#if unit}<span
-							class="ml-1 text-sm font-normal text-gray-500">{unit}</span
+							class="ml-1 text-sm font-normal text-ink-subtle">{unit}</span
 						>{/if}
 				</span>
 			</span>

@@ -31,15 +31,15 @@
 	go: it widens its column, breaks the grid and drags the page past the viewport.
 	As rows, the label holds its width and the figure truncates within what is left.
 -->
-<dl class="card divide-y divide-gray-100">
+<dl class="card divide-y divide-line">
 	{#each windows as window (window.key)}
 		<div class="flex items-baseline justify-between gap-4 px-4 py-3">
-			<dt class="shrink-0 text-sm text-gray-600">{window.label}</dt>
+			<dt class="shrink-0 text-sm text-ink-muted">{window.label}</dt>
 			<dd class="flex min-w-0 items-baseline gap-1.5">
 				<span class="truncate text-xl font-semibold tabular-nums">
 					{$totals ? formatCount($totals[window.key]) : '…'}
 				</span>
-				{#if unit}<span class="shrink-0 text-sm text-gray-500">{unit}</span>{/if}
+				{#if unit}<span class="shrink-0 text-sm text-ink-subtle">{unit}</span>{/if}
 			</dd>
 		</div>
 	{/each}
